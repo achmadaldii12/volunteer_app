@@ -1,0 +1,1095 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../core/theme.dart';
+import '../core/utils.dart';
+import '../models/models.dart';
+import '../providers/app_state.dart';
+import '../widgets/common.dart';
+import 'event_detail_screen.dart';
+import 'impact_screen.dart';
+
+// Model Sederhana untuk Artikel Blog Volunteer
+class ArticleModel {
+  final String title;
+  final String excerpt;
+  final String content;
+  final String imageUrl;
+  final String date;
+  final List<String> additionalImages;
+
+  const ArticleModel({
+    required this.title,
+    required this.excerpt,
+    required this.content,
+    required this.imageUrl,
+    required this.date,
+    required this.additionalImages,
+  });
+}
+
+// Data Lengkap 10 Artikel Menggunakan Gambar dari artikel_1.jpg sampai artikel_10.jpg
+const List<ArticleModel> kBlogArticles = [
+  ArticleModel(
+    title: 'Di Balik Rel Kereta: Cerita Relawan dari Komunitas Edan Sepur',
+    excerpt: 'Apa yang pertama kali terbayangkan olehmu ketika mendengar kereta api? Sebagian dari kita mungkin berpikir...',
+    date: '15 Oktober 2026',
+    imageUrl: 'assets/image/artikel_1.jpg',
+    content: '''Apa yang pertama kali terbayangkan olehmu ketika mendengar kereta api? Sebagian dari kita mungkin berpikir tentang perjalanan jauh, ketepatan waktu, atau stasiun yang sibuk. Namun, di balik beroperasinya ribuan perjalanan kereta setiap harinya, ada cerita-cerita luar biasa dari para relawan yang mendedikasikan waktu mereka untuk keselamatan dan edukasi perlintasan sebidang.
+
+Komunitas Edan Sepur adalah salah satu contoh nyata bagaimana kecintaan pada transportasi massal dapat diubah menjadi aksi sosial yang berdampak langsung bagi masyarakat. Para relawan secara rutin turun ke lapangan memberikan edukasi kepada pengendara jalan agar lebih disiplin dan mengutamakan keselamatan di perlintasan kereta api.''',
+    additionalImages: ['assets/image/artikel_2.jpg', 'assets/image/artikel_3.jpg'],
+  ),
+  ArticleModel(
+    title: 'Inspirasiku Jadi Relawan adalah Basarnas',
+    excerpt: 'Apa yang pertama kali terpikirkan olehmu ketika melihat Basarnas di TV? Keberanian dan jiwa kemanusiaan...',
+    date: '10 Oktober 2026',
+    imageUrl: 'assets/image/artikel_2.jpg',
+    content: '''Apa yang pertama kali terpikirkan olehmu ketika melihat Basarnas (Badan Nasional Pencarian dan Pertolongan) di TV? Keberanian, ketangguhan, dan jiwa kemanusiaan tanpa pamrih adalah hal utama yang melekat pada para pahlawan kemanusiaan ini.
+
+Banyak relawan muda yang terinspirasi terjun ke dunia sosial dan kebencanaan setelah menyaksikan dedikasi Basarnas dalam mengevakuasi korban bencana alam maupun kecelakaan di berbagai pelosok nusantara.''',
+    additionalImages: ['assets/image/artikel_4.jpg', 'assets/image/artikel_5.jpg'],
+  ),
+  ArticleModel(
+    title: 'Sekolah Kehidupan Bernama Komunitas dan Relawan',
+    excerpt: 'Setiap Oktober, kita kembali mengingat Sumpah Pemuda sebagai salah satu tonggak penting...',
+    date: '02 Oktober 2026',
+    imageUrl: 'assets/image/artikel_3.jpg',
+    content: '''Setiap Oktober, kita kembali mengingat Sumpah Pemuda sebagai salah satu tonggak penting dalam perjalanan bangsa. Di era modern ini, semangat persatuan tersebut bertransformasi ke dalam berbagai bentuk aksi nyata melalui komunitas sosial dan gerakan kerelawanan.
+
+Bergabung dengan komunitas relawan seringkali disebut sebagai "sekolah kehidupan yang sesungguhnya". Di sinilah tempat di mana kita belajar kepemimpinan dan kerja sama.''',
+    additionalImages: ['assets/image/artikel_6.jpg', 'assets/image/artikel_7.jpg'],
+  ),
+  ArticleModel(
+    title: 'Aksi Nyata Pemuda Membersihkan Lingkungan Pantai',
+    excerpt: 'Kepedulian terhadap sampah plastik di pesisir pantai kini menjadi fokus utama gerakan relawan muda...',
+    date: '28 September 2026',
+    imageUrl: 'assets/image/artikel_4.jpg',
+    content: '''Kepedulian terhadap sampah plastik di pesisir pantai kini menjadi fokus utama gerakan relawan muda di berbagai daerah pesisir nusantara demi menjaga ekosistem laut tetap lestari dan bersih dari limbah anorganik.
+    
+Aksi bersih-bersih pantai ini melibatkan ratusan pemuda dari berbagai latar belakang organisasi sosial.''',
+    additionalImages: ['assets/image/artikel_8.jpg', 'assets/image/artikel_9.jpg'],
+  ),
+  ArticleModel(
+    title: 'Mengajar di Pelosok Negeri: Senyum Anak-Anak Perbatasan',
+    excerpt: 'Menjadi relawan pengajar memberikan pengalaman batin yang luar biasa saat melihat antusiasme anak-anak...',
+    date: '20 September 2026',
+    imageUrl: 'assets/image/artikel_5.jpg',
+    content: '''Menjadi relawan pengajar memberikan pengalaman batin yang luar biasa saat melihat antusiasme anak-anak di daerah perbatasan dalam menuntut ilmu meskipun dengan fasilitas yang sangat terbatas.
+    
+Semangat mereka membakar motivasi kita untuk terus berbagi pengetahuan dan inspirasi.''',
+    additionalImages: ['assets/image/artikel_10.jpg', 'assets/image/artikel_1.jpg'],
+  ),
+  ArticleModel(
+    title: 'Peran Teknologi dalam Gerakan Kemanusiaan Modern',
+    excerpt: 'Bagaimana platform digital dan aplikasi membantu mempercepat penyaluran bantuan saat bencana alam...',
+    date: '15 September 2026',
+    imageUrl: 'assets/image/artikel_6.jpg',
+    content: '''Bagaimana platform digital dan aplikasi membantu mempercepat penyaluran bantuan saat bencana alam terjadi, menghubungkan donatur secara langsung dengan para relawan di posko darurat.
+    
+Inovasi teknologi kini menjadi pilar penting efisiensi logistik kemanusiaan di Indonesia.''',
+    additionalImages: ['assets/image/artikel_2.jpg', 'assets/image/artikel_3.jpg'],
+  ),
+  ArticleModel(
+    title: 'Kisah Inspiratif Dokter Muda yang Melayani Kesehatan Gratis',
+    excerpt: 'Perjalanan tenaga medis keliling desa terpencil untuk memberikan layanan kesehatan bagi warga kurang mampu...',
+    date: '08 September 2026',
+    imageUrl: 'assets/image/artikel_7.jpg',
+    content: '''Perjalanan tenaga medis keliling desa terpencil untuk memberikan layanan kesehatan bagi warga kurang mampu yang sulit menjangkau fasilitas rumah sakit umum.
+    
+Dedikasi tanpa pamrih ini memberikan secercah harapan kesehatan bagi masyarakat pelosok.''',
+    additionalImages: ['assets/image/artikel_4.jpg', 'assets/image/artikel_5.jpg'],
+  ),
+  ArticleModel(
+    title: 'Membangun Ketahanan Pangan Melalui Urban Farming Komunitas',
+    excerpt: 'Memanfaatkan lahan kosong di perkotaan padat penduduk untuk menanam sayuran organik bersama warga...',
+    date: '01 September 2026',
+    imageUrl: 'assets/image/artikel_8.jpg',
+    content: '''Memanfaatkan lahan kosong di perkotaan padat penduduk untuk menanam sayuran organik bersama warga demi menciptakan kemandirian pangan skala mikro.
+    
+Gerakan hijau ini juga mempererat kebersamaan antarwarga perkotaan.''',
+    additionalImages: ['assets/image/artikel_6.jpg', 'assets/image/artikel_7.jpg'],
+  ),
+  ArticleModel(
+    title: 'Seni dan Kreativitas untuk Pemulihan Trauma Anak Korban Bencana',
+    excerpt: 'Metode trauma healing menggunakan pendekatan seni menggambar dan bermain bersama anak-anak...',
+    date: '25 Agustus 2026',
+    imageUrl: 'assets/image/artikel_9.jpg',
+    content: '''Metode trauma healing menggunakan pendekatan seni menggambar, mendongeng, dan bermain bersama untuk mengembalikan senyum ceria anak-anak pasca bencana alam.
+    
+Pendekatan psikososial terbukti ampuh memulihkan mental anak-anak.''',
+    additionalImages: ['assets/image/artikel_8.jpg', 'assets/image/artikel_10.jpg'],
+  ),
+  ArticleModel(
+    title: 'Menyebarkan Semangat Literasi Lewat Taman Baca Keliling',
+    excerpt: 'Motor Pustaka dan sepeda hias berisi buku cerita keliling kampung demi menumbuhkan minat baca anak...',
+    date: '18 Agustus 2026',
+    imageUrl: 'assets/image/artikel_10.jpg',
+    content: '''Motor Pustaka dan sepeda hias berisi ratusan buku cerita keliling kampung demi menumbuhkan minat baca anak-anak sejak usia dini di pelosok daerah.
+    
+Literasi adalah jendela dunia yang harus dapat diakses oleh seluruh anak bangsa.''',
+    additionalImages: ['assets/image/artikel_1.jpg', 'assets/image/artikel_2.jpg'],
+  ),
+];
+
+// Halaman Detail Artikel
+class ArticleDetailScreen extends StatelessWidget {
+  const ArticleDetailScreen(this.article, {super.key});
+  final ArticleModel article;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 8, bottom: 16, left: 12, right: 12),
+            decoration: const BoxDecoration(
+              color: Color(0xFFE53935),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3))],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Text('Detail Artikel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    article.title,
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 14, color: muted(context)),
+                      const SizedBox(width: 6),
+                      Text(article.date, style: TextStyle(fontSize: 12, color: muted(context))),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // GAMBAR UTAMA HD
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      bool isWide = constraints.maxWidth > 800;
+                      Widget imageWidget = ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: SizedBox(
+                          height: isWide ? 550 : 430,
+                          width: double.infinity,
+                          child: Image.asset(
+                            article.imageUrl,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                            cacheWidth: 1600,
+                          ),
+                        ),
+                      );
+
+                      Widget contentWidget = Text(
+                        article.content,
+                        style: TextStyle(fontSize: 15, height: 1.7, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.85)),
+                      );
+
+                      if (isWide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 6, child: imageWidget),
+                            const SizedBox(width: 32),
+                            Expanded(flex: 5, child: contentWidget),
+                          ],
+                        );
+                      } else {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            imageWidget,
+                            const SizedBox(height: 24),
+                            contentWidget,
+                          ],
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 36),
+
+                  // --- GALERI DOKUMENTASI KEGIATAN ---
+                  const Text('Galeri Dokumentasi Kegiatan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    height: 180,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: article.additionalImages.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 14),
+                      itemBuilder: (context, index) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: SizedBox(
+                            width: 240,
+                            height: 180,
+                            child: Image.asset(
+                              article.additionalImages[index],
+                              fit: BoxFit.cover,
+                              filterQuality: FilterQuality.high,
+                              cacheWidth: 800,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Halaman Daftar Semua Artikel (Menampilkan Kesemua 10 Artikel)
+class AllArticlesScreen extends StatelessWidget {
+  const AllArticlesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 8, bottom: 16, left: 12, right: 12),
+            decoration: const BoxDecoration(
+              color: Color(0xFFE53935),
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
+              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3))],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Text('Semua Artikel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(20),
+              physics: const BouncingScrollPhysics(),
+              itemCount: kBlogArticles.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 16),
+              itemBuilder: (context, index) {
+                final article = kBlogArticles[index];
+                return InkWell(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ArticleDetailScreen(article))),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0, 2))],
+                    ),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+                          child: Image.asset(
+                            article.imageUrl,
+                            width: 120,
+                            height: 110,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                            cacheWidth: 600,
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  article.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(article.date, style: TextStyle(fontSize: 11, color: muted(context))),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final primary = Theme.of(context).colorScheme.primary;
+    final latest = s.query(upcomingOnly: true).take(10).toList();
+    final popular = s.query(upcomingOnly: true, sort: EventSort.popular).take(5).toList();
+
+    return ListView(
+      padding: EdgeInsets.zero,
+      physics: const BouncingScrollPhysics(),
+      children: [
+        // --- 1. Bagian Header Sapaan & Logo ---
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1.0),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 3))],
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 95,
+                  height: 95,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset('assets/image/logo_volunteer.png', width: 95, height: 95, fit: BoxFit.cover),
+                  ),
+                ),
+                const SizedBox(width: 18),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Halo, ${s.user?.firstName ?? 'Relawan'}',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('Mari berkontribusi untuk Indonesia bersama-sama', style: TextStyle(color: muted(context), fontSize: 13)),
+                    ],
+                  ),
+                ),
+                InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => s.setTab(3),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      CircleAvatar(radius: 22, backgroundColor: softOf(context), child: Icon(Icons.notifications_none, color: primary)),
+                      if (s.unreadCount > 0)
+                        Positioned(
+                          right: 2,
+                          top: 2,
+                          child: Container(width: 10, height: 10, decoration: const BoxDecoration(color: AppColors.danger, shape: BoxShape.circle)),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        
+        // --- 2. Hero Banner Full Lebar (Tinggi Diperbesar Menjadi 420) ---
+        GestureDetector(
+          onTap: () => s.openSearch('Semua'),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
+            child: SizedBox(
+              height: 420,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 420,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: const AssetImage('assets/image/volunteer_banner.jpg'),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.center,
+                        filterQuality: FilterQuality.high,
+                        colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.22), BlendMode.darken),
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Ambil peran jadi volunteer',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 38,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
+                              shadows: [Shadow(offset: Offset(0, 3), blurRadius: 10.0, color: Colors.black87)],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 520),
+                            child: const Text(
+                              'Bergabunglah dengan ribuan volunteer lainnya untuk menciptakan perubahan nyata di sekitar kita.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                height: 1.4,
+                                shadows: [Shadow(offset: Offset(0, 2), blurRadius: 6.0, color: Colors.black87)],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE53935).withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: Offset(0, 4))],
+                            ),
+                            child: const Text('Cari Event', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 0.5)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Konten di Bawah Banner
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- 3. Kategori ---
+              Center(
+                child: Text('Kategori', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: kCategories
+                      .map((c) => InkWell(
+                            onTap: () => s.openSearch(c.name),
+                            child: SizedBox(
+                              width: 86,
+                              child: Column(children: [
+                                CircleAvatar(radius: 26, backgroundColor: primary, child: Icon(c.icon, color: Colors.white)),
+                                const SizedBox(height: 6),
+                                Text(
+                                  c.name,
+                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.visible,
+                                ),
+                              ]),
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // --- 4. Bagian Event Terbaru ---
+              const Text('Event Terbaru', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              ...latest.map((e) => _LatestEventCard(e)),
+              const SizedBox(height: 12),
+              
+              Center(
+                child: SizedBox(
+                  width: 180,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE53935).withOpacity(0.85),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      elevation: 2,
+                    ),
+                    onPressed: () => s.openSearch('Semua'),
+                    child: const Text('Lihat Semua >', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // --- 5. Bagian Paling Diminati ---
+              const SectionHeader('Paling Diminati'),
+              const SizedBox(height: 12),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: popular.map((item) {
+                      double itemWidth = (constraints.maxWidth - (4 * 14)) / 5;
+                      return SizedBox(
+                        width: itemWidth,
+                        child: _PopularCard(item, cardWidth: itemWidth),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // --- 6. Bagian Statistik ---
+              Row(children: [
+                Expanded(child: _CustomStatTile(Icons.stars_outlined, fmtNum(s.totalPoints), 'Poin')),
+                const SizedBox(width: 12),
+                Expanded(child: _CustomStatTile(Icons.verified_user_outlined, '${s.totalEvents}', 'Kegiatan')),
+                const SizedBox(width: 12),
+                Expanded(child: _CustomStatTile(Icons.timer_outlined, '${s.totalHours} Jam', 'Kontribusi')),
+              ]),
+              const SizedBox(height: 12),
+              
+              Center(
+                child: SizedBox(
+                  width: 200,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE53935).withOpacity(0.85),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      elevation: 2,
+                    ),
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ImpactScreen())),
+                    child: const Text('Lihat dampak saya >', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 36),
+
+              // --- 7. Blog Volunteer ---
+              const Center(
+                child: Text('Blog Volunteer', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 16),
+              
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  double cardWidth = (constraints.maxWidth - 32) / 3;
+                  if (cardWidth < 220) cardWidth = constraints.maxWidth;
+
+                  return constraints.maxWidth > 700
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: kBlogArticles
+                              .take(3)
+                              .map((article) => SizedBox(
+                                    width: cardWidth,
+                                    child: _GridArticleCard(article),
+                                  ))
+                              .toList(),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: 3,
+                          separatorBuilder: (_, __) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) => _GridArticleCard(kBlogArticles[index]),
+                        );
+                },
+              ),
+              const SizedBox(height: 24),
+
+              Center(
+                child: SizedBox(
+                  width: 210,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE53935).withOpacity(0.85),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 3,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AllArticlesScreen()),
+                      );
+                    },
+                    child: const Text(
+                      'Baca artikel lainnya',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.3),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+
+        // --- 8. FOOTER VOLUNTEER ---
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
+          decoration: BoxDecoration(
+            color: isDark(context) ? const Color(0xFF141414) : const Color(0xFFF7F7F7),
+            border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1)),
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              bool isWide = constraints.maxWidth > 800;
+              
+              Widget brandColumn = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Volunteer.org',
+                    style: TextStyle(
+                      color: Color(0xFFE53935),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Volunteer adalah wadah online untuk mempertemukan relawan dan organisasi/komunitas sosial.',
+                    style: TextStyle(fontSize: 13, color: muted(context), height: 1.4),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Ubah niat baik jadi aksi baik hari ini.',
+                    style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: muted(context)),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Volunteer Hub Surabaya',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Jl. Tunjungan No. 60\nSurabaya, Jawa Timur 60275',
+                    style: TextStyle(fontSize: 12.5, color: muted(context), height: 1.4),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    '+62 858 1552 1263',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      _socialIcon(Icons.facebook),
+                      const SizedBox(width: 8),
+                      _socialIcon(Icons.chat_bubble_outline),
+                      const SizedBox(width: 8),
+                      _socialIcon(Icons.camera_alt_outlined),
+                      const SizedBox(width: 8),
+                      _socialIcon(Icons.play_arrow_outlined),
+                    ],
+                  ),
+                ],
+              );
+
+              Widget linksColumn1 = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _footerLink('Tentang Kami'),
+                  _footerLink('Donasi'),
+                  _footerLink('Karir'),
+                  _footerLink('Kontak Kami'),
+                  _footerLink('Kerjasama CSR'),
+                ],
+              );
+
+              Widget linksColumn2 = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _footerLink('Liputan Media'),
+                  _footerLink('Blog'),
+                  _footerLink('Donatur'),
+                  _footerLink('Syarat & Ketentuan'),
+                  _footerLink('Kebijakan Privasi'),
+                ],
+              );
+
+              Widget partnerColumn = Column(
+                crossAxisAlignment: isWide ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Didukung oleh:',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                        ),
+                        child: const Text('Biznet GioCloud', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('Insights by hotjar', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+
+              if (isWide) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(flex: 3, child: brandColumn),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 2, child: linksColumn1),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 2, child: linksColumn2),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 3, child: partnerColumn),
+                  ],
+                );
+              } else {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    brandColumn,
+                    const SizedBox(height: 32),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: linksColumn1),
+                        const SizedBox(width: 16),
+                        Expanded(child: linksColumn2),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    partnerColumn,
+                  ],
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _footerLink(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  Widget _socialIcon(IconData icon) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: const BoxDecoration(
+        color: Color(0xFF333333),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: Colors.white, size: 16),
+    );
+  }
+}
+
+// Widget Kartu Artikel Grid
+class _GridArticleCard extends StatelessWidget {
+  const _GridArticleCard(this.article);
+  final ArticleModel article;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ArticleDetailScreen(article))),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1.0),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 3))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: SizedBox(
+                height: 250,
+                width: double.infinity,
+                child: Image.asset(
+                  article.imageUrl,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  filterQuality: FilterQuality.high,
+                  cacheWidth: 800,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    article.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, height: 1.3),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    article.excerpt,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: muted(context), height: 1.3),
+                  ),
+                  const SizedBox(height: 12),
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Text('Baca lebih lanjut', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFFE53935))),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Widget Kotak Statistik
+class _CustomStatTile extends StatelessWidget {
+  const _CustomStatTile(this.icon, this.value, this.label);
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      decoration: BoxDecoration(
+        color: isDark(context) ? const Color(0xFF1E1E1E) : const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1.0),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0, 2))],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: const Color(0xFFE53935), size: 22),
+          const SizedBox(height: 8),
+          Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(fontSize: 12, color: muted(context))),
+        ],
+      ),
+    );
+  }
+}
+
+class _LatestEventCard extends StatefulWidget {
+  const _LatestEventCard(this.e);
+  final EventModel e;
+
+  @override
+  State<_LatestEventCard> createState() => _LatestEventCardState();
+}
+
+class _LatestEventCardState extends State<_LatestEventCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final catInfo = categoryInfo(widget.e.category);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: _isHovered ? const Color(0xFFFFEBEE) : (isDark(context) ? const Color(0xFF1E1E1E) : const Color(0xFFFAFAFA)),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _isHovered ? const Color(0xFFEF9A9A) : Colors.grey.withOpacity(0.15)),
+            boxShadow: [
+              BoxShadow(
+                color: _isHovered ? Colors.red.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                blurRadius: _isHovered ? 8 : 4,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(widget.e))),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: SizedBox(
+                        width: 140,
+                        height: 130,
+                        child: EventImage(widget.e, width: 140, height: 130, radius: 14),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.e.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(fmtDate(widget.e.date), style: TextStyle(fontSize: 12, color: muted(context))),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(color: softOf(context), borderRadius: BorderRadius.circular(10)),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(catInfo.icon, size: 11, color: catInfo.color),
+                                const SizedBox(width: 4),
+                                Text(widget.e.category, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: catInfo.color)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PopularCard extends StatelessWidget {
+  const _PopularCard(this.e, {required this.cardWidth});
+  final EventModel e;
+  final double cardWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final c = categoryInfo(e.category);
+    return AppCard(
+      padding: const EdgeInsets.all(10),
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(e))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: EventImage(e, width: cardWidth, height: 280, radius: 12),
+          ),
+          const SizedBox(height: 10),
+          Text(e.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          const SizedBox(height: 4),
+          InfoRow(Icons.calendar_today_outlined, fmtDate(e.date), size: 11),
+          InfoRow(Icons.group_outlined, '${s.participants(e)} peserta', size: 11),
+        ],
+      ),
+    );
+  }
+}

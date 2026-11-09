@@ -131,7 +131,7 @@ class _SearchScreenState extends State<SearchScreen> {
             maxCrossAxisExtent: 260,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 0.62, // Menyesuaikan agar gambar lebih panjang ke bawah namun kotak tetap rapi
+            childAspectRatio: 0.65, // Rasio disesuaikan agar gambar tetap besar dan tinggi kotak bawah pas
           ),
           itemBuilder: (context, index) {
             return _SearchEventGridCard(list[index]);
@@ -207,7 +207,7 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                         topRight: Radius.circular(16),
                       ),
                       child: SizedBox(
-                        height: 140, // Tinggi gambar diperbesar sedikit ke bawah (dari 125 ke 140)
+                        height: 140, // Ukuran gambar dikembalikan besar ke 140
                         width: double.infinity,
                         child: EventImage(widget.e, width: double.infinity, height: 140, radius: 0),
                       ),
@@ -230,12 +230,12 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(9),
+                    padding: const EdgeInsets.fromLTRB(9, 6, 9, 6), // Padding diperkecil agar konten bawah lebih rapat ke atas
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: softOf(context),
                             borderRadius: BorderRadius.circular(6),
@@ -243,61 +243,61 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                           child: Text(
                             widget.e.category,
                             style: TextStyle(
-                              fontSize: 9.5,
+                              fontSize: 9,
                               fontWeight: FontWeight.w600,
                               color: catInfo.color,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 2),
                         Text(
                           widget.e.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 11.5,
                             height: 1.15,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 2),
                         Text(
                           widget.e.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 9.5,
                             color: muted(context),
-                            height: 1.2,
+                            height: 1.15,
                           ),
                         ),
                         const Spacer(),
                         Row(
                           children: [
-                            Icon(Icons.calendar_today_outlined, size: 10.5, color: muted(context)),
+                            Icon(Icons.calendar_today_outlined, size: 10, color: muted(context)),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 fmtDate(widget.e.date),
-                                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 1),
                         Row(
                           children: [
-                            Icon(Icons.group_outlined, size: 10.5, color: muted(context)),
+                            Icon(Icons.group_outlined, size: 10, color: muted(context)),
                             const SizedBox(width: 4),
                             Text(
                               '${s.participants(widget.e)} Relawan',
-                              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 3),
                         StatusChip(
                           widget.e.priceText,
                           widget.e.isPaid ? const Color(0xFFE65100) : const Color(0xFF2E7D32),

@@ -381,7 +381,7 @@ class HomeScreen extends StatelessWidget {
       padding: EdgeInsets.zero,
       physics: const BouncingScrollPhysics(),
       children: [
-        // --- 1. Bagian Header Sapaan & Logo ---
+        // --- 1. Bagian Header Sapaan & Logo (Font Dikecilkan Sesuai Permintaan) ---
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
           child: Container(
@@ -395,11 +395,20 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(
-                  width: 95,
-                  height: 95,
+                  width: 75,
+                  height: 75,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset('assets/image/logo_volunteer.png', width: 95, height: 95, fit: BoxFit.cover),
+                    child: OverflowBox(
+                      maxWidth: 110,
+                      maxHeight: 110,
+                      child: Image.asset(
+                        'assets/image/logo_volunteer.png',
+                        width: 110,
+                        height: 110,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 18),
@@ -410,10 +419,10 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Halo, ${s.user?.firstName ?? 'Relawan'}',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                       ),
-                      const SizedBox(height: 4),
-                      Text('Mari berkontribusi untuk Indonesia bersama-sama', style: TextStyle(color: muted(context), fontSize: 13)),
+                      const SizedBox(height: 3),
+                      Text('Mari berkontribusi untuk Indonesia bersama-sama', style: TextStyle(color: muted(context), fontSize: 11.5)),
                     ],
                   ),
                 ),
@@ -522,19 +531,17 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- 3. Kategori (Sudah Dipertegas Kontras Putih, Border, dan Bayangannya) ---
+              // --- 3. Kategori ---
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 decoration: BoxDecoration(
                   color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  // Border tipis abu-abu agar kontras dengan latar aplikasi
                   border: Border.all(
                     color: isDark(context) ? Colors.grey.withOpacity(0.3) : Colors.grey.shade300,
                     width: 1.2,
                   ),
-                  // Bayangan lebih jelas
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.08),

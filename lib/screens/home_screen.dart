@@ -439,7 +439,7 @@ class HomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         
-        // --- 2. Hero Banner Full Lebar (Tinggi Diperbesar Menjadi 420) ---
+        // --- 2. Hero Banner Full Lebar ---
         GestureDetector(
           onTap: () => s.openSearch('Semua'),
           child: ClipRRect(
@@ -522,34 +522,57 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- 3. Kategori ---
-              Center(
-                child: Text('Kategori', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: kCategories
-                      .map((c) => InkWell(
-                            onTap: () => s.openSearch(c.name),
-                            child: SizedBox(
-                              width: 86,
-                              child: Column(children: [
-                                CircleAvatar(radius: 26, backgroundColor: primary, child: Icon(c.icon, color: Colors.white)),
-                                const SizedBox(height: 6),
-                                Text(
-                                  c.name,
-                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.visible,
-                                ),
-                              ]),
-                            ),
-                          ))
-                      .toList(),
+              // --- 3. Kategori (Sudah Dipertegas Kontras Putih, Border, dan Bayangannya) ---
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                decoration: BoxDecoration(
+                  color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  // Border tipis abu-abu agar kontras dengan latar aplikasi
+                  border: Border.all(
+                    color: isDark(context) ? Colors.grey.withOpacity(0.3) : Colors.grey.shade300,
+                    width: 1.2,
+                  ),
+                  // Bayangan lebih jelas
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Text('Kategori', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: kCategories
+                            .map((c) => InkWell(
+                                  onTap: () => s.openSearch(c.name),
+                                  child: SizedBox(
+                                    width: 80,
+                                    child: Column(children: [
+                                      CircleAvatar(radius: 26, backgroundColor: primary, child: Icon(c.icon, color: Colors.white)),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        c.name,
+                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ]),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 32),

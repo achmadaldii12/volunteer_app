@@ -131,7 +131,7 @@ class _SearchScreenState extends State<SearchScreen> {
             maxCrossAxisExtent: 260,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 0.65,
+            childAspectRatio: 0.62, // Menyesuaikan agar gambar lebih panjang ke bawah namun kotak tetap rapi
           ),
           itemBuilder: (context, index) {
             return _SearchEventGridCard(list[index]);
@@ -141,7 +141,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 }
 
-// Widget Kartu Event dengan Efek Hover Background Merah Lembut
 class _SearchEventGridCard extends StatefulWidget {
   const _SearchEventGridCard(this.e);
   final EventModel e;
@@ -153,15 +152,20 @@ class _SearchEventGridCard extends StatefulWidget {
 class _SearchEventGridCardState extends State<_SearchEventGridCard> {
   bool _isHovered = false;
 
+  String _getDynamicDeadlineText(DateTime eventDate) {
+    final target = DateTime(eventDate.year, eventDate.month, eventDate.day);
+    final deadlineDate = target.subtract(const Duration(days: 3));
+    return 'Batas registrasi ${fmtDate(deadlineDate)}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
     final catInfo = categoryInfo(widget.e.category);
     final isDarkMode = isDark(context);
 
-    // Menentukan warna background saat kursor diarahkan (Merah lembut tidak terlalu terang)
     final Color normalColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final Color hoverColor = isDarkMode ? const Color(0xFF321A1A) : const Color(0xFFFFEBEE); // Merah sangat lembut (soft red)
+    final Color hoverColor = isDarkMode ? const Color(0xFF321A1A) : const Color(0xFFFFEBEE);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -195,7 +199,6 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Gambar Banner
                 Stack(
                   children: [
                     ClipRRect(
@@ -204,9 +207,9 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                         topRight: Radius.circular(16),
                       ),
                       child: SizedBox(
-                        height: 125,
+                        height: 140, // Tinggi gambar diperbesar sedikit ke bawah (dari 125 ke 140)
                         width: double.infinity,
-                        child: EventImage(widget.e, width: double.infinity, height: 125, radius: 0),
+                        child: EventImage(widget.e, width: double.infinity, height: 140, radius: 0),
                       ),
                     ),
                     Positioned(
@@ -216,95 +219,85 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                         color: Colors.black.withOpacity(0.65),
-                        child: const Text(
-                          'Batas registrasi 3 hari lagi',
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500),
+                        child: Text(
+                          _getDynamicDeadlineText(widget.e.date),
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ),
                   ],
                 ),
-                
-                // 2. Deskripsi & Detail Kartu
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(9),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Chip Kategori Kecil
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
                             color: softOf(context),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             widget.e.category,
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 9.5,
                               fontWeight: FontWeight.w600,
                               color: catInfo.color,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 5),
-                        // Judul Event
+                        const SizedBox(height: 3),
                         Text(
                           widget.e.title,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 12.5,
+                            fontSize: 12,
+                            height: 1.15,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          widget.e.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: muted(context),
                             height: 1.2,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        // Teks Deskripsi
-                        Text(
-                          widget.e.description,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            color: muted(context),
-                            height: 1.25,
-                          ),
-                        ),
-                        
                         const Spacer(),
-
-                        // Tanggal Event
                         Row(
                           children: [
-                            Icon(Icons.calendar_today_outlined, size: 11, color: muted(context)),
-                            const SizedBox(width: 5),
+                            Icon(Icons.calendar_today_outlined, size: 10.5, color: muted(context)),
+                            const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 fmtDate(widget.e.date),
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 3),
-                        // Jumlah Relawan
+                        const SizedBox(height: 2),
                         Row(
                           children: [
-                            Icon(Icons.group_outlined, size: 11, color: muted(context)),
-                            const SizedBox(width: 5),
+                            Icon(Icons.group_outlined, size: 10.5, color: muted(context)),
+                            const SizedBox(width: 4),
                             Text(
                               '${s.participants(widget.e)} Relawan',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
-                        // Status Harga
+                        const SizedBox(height: 4),
                         StatusChip(
                           widget.e.priceText,
                           widget.e.isPaid ? const Color(0xFFE65100) : const Color(0xFF2E7D32),

@@ -1,162 +1,127 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../core/theme.dart';
-import '../core/utils.dart';
-import '../models/models.dart';
-import '../providers/app_state.dart';
-import '../widgets/common.dart';
+
+class UserRank {
+  final String userName;
+  final int points;
+  final int eventsCount;
+
+  UserRank({
+    required this.userName,
+    required this.points,
+    required this.eventsCount,
+  });
+
+  String get badgeTier {
+    if (points >= 10000) return 'Expert 👑';
+    if (points >= 5000) return 'Brilliant 🥇';
+    if (points >= 2500) return 'Master 🥈';
+    if (points >= 1000) return 'Cool 🥉';
+    return 'Beginner 🌟';
+  }
+}
 
 class AchievementScreen extends StatelessWidget {
-  const AchievementScreen({super.key});
+  AchievementScreen({Key? key}) : super(key: key);
+
+  final List<UserRank> _rankingList = [
+    UserRank(userName: 'Achmad Aldi', points: 10450, eventsCount: 220),
+    UserRank(userName: 'Siti Rahmawati', points: 5400, eventsCount: 115),
+    UserRank(userName: 'Budi Santoso', points: 2800, eventsCount: 60),
+    UserRank(userName: 'Deni Pratama', points: 1200, eventsCount: 28),
+    UserRank(userName: 'Rina Wijaya', points: 850, eventsCount: 18),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final s = context.watch<AppState>();
-    final earned = s.earnedBadges;
-    final locked = kBadges.where((b) => !s.isEarned(b)).toList()
-      ..sort((a, b) => s.badgeProgress(b).compareTo(s.badgeProgress(a)));
-    final next = locked.isEmpty ? null : locked.first;
-
-    Widget stat(String v, String l) => Column(children: [
-          Text(v, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-          Text(l, style: const TextStyle(fontSize: 12, color: Colors.black54)),
-        ]);
+    final currentUser = _rankingList.first; // Sudah menggunakan _rankingList yang benar
 
     return Scaffold(
-      body: ListView(padding: EdgeInsets.zero, children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(16, 44, 16, 20),
-          decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [AppColors.primary, AppColors.primaryLight]),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))),
-          child: Column(children: [
-            Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.pop(context))),
-            const Icon(Icons.emoji_events, color: Colors.amber, size: 80),
-            const Text('Achievement',
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-              child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                stat(fmtNum(s.totalPoints), 'Total Poin'),
-                stat('${earned.length}', 'Badge'),
-              ]),
-            ),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SectionHeader('Badge Saya',
-                onAll: () => Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const AllBadgesScreen()))),
-            const SizedBox(height: 12),
-            if (earned.isEmpty)
-              Text('Belum ada badge. Ikuti kegiatan pertamamu!', style: TextStyle(color: muted(context)))
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [for (final b in earned.take(3)) BadgeCircle(b, true)],
-              ),
-            const SizedBox(height: 20),
-            if (next != null)
-              AppCard(
-                padding: const EdgeInsets.all(14),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Badge berikutnya: ${next.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 2),
-                  Text(next.desc, style: TextStyle(fontSize: 12, color: muted(context))),
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                        value: s.badgeProgress(next), minHeight: 8, color: next.color,
-                        backgroundColor: softOf(context)),
-                  ),
-                  const SizedBox(height: 4),
-                  Text('${fmtNum(s.metricValue(next.metric))} / ${fmtNum(next.target)}',
-                      style: const TextStyle(fontSize: 11)),
-                ]),
-              ),
-            const SizedBox(height: 14),
-            AppCard(
-              padding: const EdgeInsets.all(16),
-              child: Row(children: [
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('Peringkat Volunteer', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text('#${s.rank}', style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                    Text('dari ${fmtNum(AppState.leaderboardSize)} volunteer',
-                        style: TextStyle(fontSize: 11, color: muted(context))),
-                  ]),
-                ),
-                const Icon(Icons.emoji_events, color: Colors.amber, size: 40),
-              ]),
-            ),
-          ]),
-        ),
-      ]),
-    );
-  }
-}
-
-class BadgeCircle extends StatelessWidget {
-  final BadgeDef b;
-  final bool earned;
-  const BadgeCircle(this.b, this.earned, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = earned ? b.color : Colors.grey;
-    return SizedBox(
-      width: 90,
-      child: Column(children: [
-        CircleAvatar(
-            radius: 30,
-            backgroundColor: color.withOpacity(.18),
-            child: Icon(earned ? b.icon : Icons.lock_outline, color: color, size: 30)),
-        const SizedBox(height: 6),
-        Text(b.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11)),
-      ]),
-    );
-  }
-}
-
-class AllBadgesScreen extends StatelessWidget {
-  const AllBadgesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final s = context.watch<AppState>();
-    return Scaffold(
-      appBar: AppBar(title: const Text('Semua Badge')),
-      body: GridView.count(
-        crossAxisCount: 2,
+      appBar: AppBar(
+        title: const Text('Achievement & Ranking'),
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: .95,
-        children: [
-          for (final b in kBadges)
-            AppCard(
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                BadgeCircle(b, s.isEarned(b)),
-                const SizedBox(height: 4),
-                Text(b.desc, textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: muted(context))),
-                const SizedBox(height: 6),
-                if (s.isEarned(b))
-                  StatusChip('Diperoleh', b.color)
-                else
-                  Text('${(s.badgeProgress(b) * 100).round()}%', style: const TextStyle(fontSize: 11)),
-              ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Card(
+              color: Colors.indigo,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 28,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.emoji_events, size: 36, color: Colors.amber),
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              currentUser.userName,
+                              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Badge: ${currentUser.badgeTier}',
+                              style: const TextStyle(color: Colors.amberAccent, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total Poin: ${currentUser.points}', style: const TextStyle(color: Colors.white70)),
+                        Text('Event Diikuti: ${currentUser.eventsCount}', style: const TextStyle(color: Colors.white70)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-        ],
+            const SizedBox(height: 20),
+            const Text('Syarat Level Badge (Max 50 Poin/Event):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: const [
+                Chip(avatar: Text('🥉'), label: Text('Cool (1.000 Poin)')),
+                Chip(avatar: Text('🥈'), label: Text('Master (2.500 Poin)')),
+                Chip(avatar: Text('🥇'), label: Text('Brilliant (5.000 Poin)')),
+                Chip(avatar: Text('👑'), label: Text('Expert (>=10.000 Poin)')),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Text('🏆 Ranking Relawan Teratas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _rankingList.length,
+              itemBuilder: (context, index) {
+                final user = _rankingList[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: index == 0 ? Colors.amber : (index == 1 ? Colors.grey : Colors.brown.shade300),
+                    child: Text('${index + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                  title: Text(user.userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text('Badge: ${user.badgeTier}'),
+                  trailing: Text('${user.points} Poin', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo)),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

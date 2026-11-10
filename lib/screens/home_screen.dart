@@ -27,7 +27,7 @@ class ArticleModel {
   });
 }
 
-// Data Lengkap 10 Artikel Menggunakan Gambar dari artikel_1.jpg sampai artikel_10.jpg
+// Data Lengkap 10 Artikel
 const List<ArticleModel> kBlogArticles = [
   ArticleModel(
     title: 'Di Balik Rel Kereta: Cerita Relawan dari Komunitas Edan Sepur',
@@ -276,7 +276,7 @@ class ArticleDetailScreen extends StatelessWidget {
   }
 }
 
-// Halaman Daftar Semua Artikel (Menampilkan Kesemua 10 Artikel)
+// Halaman Daftar Semua Artikel
 class AllArticlesScreen extends StatelessWidget {
   const AllArticlesScreen({super.key});
 
@@ -381,7 +381,7 @@ class HomeScreen extends StatelessWidget {
       padding: EdgeInsets.zero,
       physics: const BouncingScrollPhysics(),
       children: [
-        // --- 1. Bagian Header Sapaan & Logo (Font Dikecilkan Sesuai Permintaan) ---
+        // --- 1. Bagian Header Sapaan & Logo ---
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
           child: Container(
@@ -423,22 +423,6 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text('Mari berkontribusi untuk Indonesia bersama-sama', style: TextStyle(color: muted(context), fontSize: 11.5)),
-                    ],
-                  ),
-                ),
-                InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => s.setTab(3),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      CircleAvatar(radius: 22, backgroundColor: softOf(context), child: Icon(Icons.notifications_none, color: primary)),
-                      if (s.unreadCount > 0)
-                        Positioned(
-                          right: 2,
-                          top: 2,
-                          child: Container(width: 10, height: 10, decoration: const BoxDecoration(color: AppColors.danger, shape: BoxShape.circle)),
-                        ),
                     ],
                   ),
                 ),
@@ -718,185 +702,7 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-
-        // --- 8. FOOTER VOLUNTEER ---
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
-          decoration: BoxDecoration(
-            color: isDark(context) ? const Color(0xFF141414) : const Color(0xFFF7F7F7),
-            border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1)),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              bool isWide = constraints.maxWidth > 800;
-              
-              Widget brandColumn = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Volunteer.org',
-                    style: TextStyle(
-                      color: Color(0xFFE53935),
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Volunteer adalah wadah online untuk mempertemukan relawan dan organisasi/komunitas sosial.',
-                    style: TextStyle(fontSize: 13, color: muted(context), height: 1.4),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Ubah niat baik jadi aksi baik hari ini.',
-                    style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: muted(context)),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Volunteer Hub Surabaya',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Jl. Tunjungan No. 60\nSurabaya, Jawa Timur 60275',
-                    style: TextStyle(fontSize: 12.5, color: muted(context), height: 1.4),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    '+62 858 1552 1263',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _socialIcon(Icons.facebook),
-                      const SizedBox(width: 8),
-                      _socialIcon(Icons.chat_bubble_outline),
-                      const SizedBox(width: 8),
-                      _socialIcon(Icons.camera_alt_outlined),
-                      const SizedBox(width: 8),
-                      _socialIcon(Icons.play_arrow_outlined),
-                    ],
-                  ),
-                ],
-              );
-
-              Widget linksColumn1 = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _footerLink('Tentang Kami'),
-                  _footerLink('Donasi'),
-                  _footerLink('Karir'),
-                  _footerLink('Kontak Kami'),
-                  _footerLink('Kerjasama CSR'),
-                ],
-              );
-
-              Widget linksColumn2 = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _footerLink('Liputan Media'),
-                  _footerLink('Blog'),
-                  _footerLink('Donatur'),
-                  _footerLink('Syarat & Ketentuan'),
-                  _footerLink('Kebijakan Privasi'),
-                ],
-              );
-
-              Widget partnerColumn = Column(
-                crossAxisAlignment: isWide ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Didukung oleh:',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: Colors.grey.withOpacity(0.3)),
-                        ),
-                        child: const Text('Biznet GioCloud', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text('Insights by hotjar', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-
-              if (isWide) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(flex: 3, child: brandColumn),
-                    const SizedBox(width: 20),
-                    Expanded(flex: 2, child: linksColumn1),
-                    const SizedBox(width: 20),
-                    Expanded(flex: 2, child: linksColumn2),
-                    const SizedBox(width: 20),
-                    Expanded(flex: 3, child: partnerColumn),
-                  ],
-                );
-              } else {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    brandColumn,
-                    const SizedBox(height: 32),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: linksColumn1),
-                        const SizedBox(width: 16),
-                        Expanded(child: linksColumn2),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    partnerColumn,
-                  ],
-                );
-              }
-            },
-          ),
-        ),
       ],
-    );
-  }
-
-  Widget _footerLink(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  Widget _socialIcon(IconData icon) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: const BoxDecoration(
-        color: Color(0xFF333333),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, color: Colors.white, size: 16),
     );
   }
 }

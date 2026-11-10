@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/theme.dart';
@@ -26,31 +27,114 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _openSort() {
-    showModalBottomSheet(
+    showGeneralDialog(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Urutkan Kegiatan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-          for (final o in const [
-            (EventSort.soonest, 'Tanggal terdekat', Icons.event),
-            (EventSort.popular, 'Paling diminati', Icons.local_fire_department_outlined),
-            (EventSort.points, 'Poin terbanyak', Icons.stars_outlined),
-          ])
-            ListTile(
-              leading: Icon(o.$3),
-              title: Text(o.$2),
-              trailing: sort == o.$1 ? const Icon(Icons.check, color: AppColors.primary) : null,
-              onTap: () {
-                setState(() => sort = o.$1);
-                Navigator.pop(context);
-              },
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return const SizedBox.shrink();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+          child: FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      width: double.infinity,
+                      constraints: const BoxConstraints(maxWidth: 440),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                          color: const Color(0xFFEF5350),
+                          width: 2.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 25,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(26),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Urutkan Kegiatan',
+                                style: TextStyle(
+                                  color: Color(0xFF212121),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 26),
+                              for (final o in const [
+                                (EventSort.soonest, 'Tanggal terdekat', Icons.event),
+                                (EventSort.popular, 'Paling diminati', Icons.local_fire_department_outlined),
+                                (EventSort.points, 'Poin terbanyak', Icons.stars_outlined),
+                              ])
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Material(
+                                    color: sort == o.$1 ? const Color(0xFFFFEBEE) : Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(16),
+                                      onTap: () {
+                                        setState(() => sort = o.$1);
+                                        Navigator.pop(context);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                                        child: Row(
+                                          children: [
+                                            Icon(o.$3, color: sort == o.$1 ? const Color(0xFFEF5350) : Colors.grey.shade700, size: 24),
+                                            const SizedBox(width: 16),
+                                            Expanded(
+                                              child: Text(
+                                                o.$2,
+                                                style: TextStyle(
+                                                  color: sort == o.$1 ? const Color(0xFFEF5350) : Colors.grey.shade800,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                            if (sort == o.$1)
+                                              const Icon(Icons.check_circle, color: Color(0xFFEF5350), size: 22),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          const SizedBox(height: 8),
-        ]),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -131,7 +215,7 @@ class _SearchScreenState extends State<SearchScreen> {
             maxCrossAxisExtent: 260,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 0.65, // Rasio disesuaikan agar gambar tetap besar dan tinggi kotak bawah pas
+            childAspectRatio: 0.65,
           ),
           itemBuilder: (context, index) {
             return _SearchEventGridCard(list[index]);
@@ -207,7 +291,7 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                         topRight: Radius.circular(16),
                       ),
                       child: SizedBox(
-                        height: 140, // Ukuran gambar dikembalikan besar ke 140
+                        height: 140,
                         width: double.infinity,
                         child: EventImage(widget.e, width: double.infinity, height: 140, radius: 0),
                       ),
@@ -230,7 +314,7 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(9, 6, 9, 6), // Padding diperkecil agar konten bawah lebih rapat ke atas
+                    padding: const EdgeInsets.fromLTRB(9, 6, 9, 6),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -281,7 +365,7 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                                 fmtDate(widget.e.date),
                                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
                                 maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                overflow: TextOverflow.ellipsis, // Diperbaiki dari TextBorderOverflow.ellipsis
                               ),
                             ),
                           ],

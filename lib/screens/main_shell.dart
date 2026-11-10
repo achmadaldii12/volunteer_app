@@ -394,8 +394,8 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
     final primary = Theme.of(context).colorScheme.primary;
-    final latest = s.query(upcomingOnly: true).take(10).toList();
-    final popular = s.query(upcomingOnly: true, sort: EventSort.popular).take(5).toList();
+    final latest = s.query(upcomingOnly: true).take(5).toList();
+    final popular = s.query(upcomingOnly: true, sort: EventSort.popular).take(3).toList();
 
     return ListView(
       padding: EdgeInsets.zero,
@@ -467,7 +467,13 @@ class HomeScreen extends StatelessWidget {
         
         // --- 2. Hero Banner Full Lebar ---
         GestureDetector(
-          onTap: () => s.openSearch('Semua'),
+          onTap: () {
+            s.openSearch('Semua');
+            final mainShellState = context.findAncestorStateOfType<_MainShellState>();
+            mainShellState?.setState(() {
+              mainShellState._currentIndex = 1;
+            });
+          },
           child: ClipRRect(
             borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
             child: SizedBox(
@@ -548,10 +554,10 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- 3. Kategori ---
+              // --- 3. Kategori (Diperbaiki agar muat & tidak terpotong) ---
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
                 decoration: BoxDecoration(
                   color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -572,25 +578,36 @@ class HomeScreen extends StatelessWidget {
                     Text('Kategori', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
                     const SizedBox(height: 16),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: kCategories
-                            .map((c) => InkWell(
-                                  onTap: () => s.openSearch(c.name),
-                                  child: SizedBox(
-                                    width: 70,
-                                    child: Column(children: [
-                                      CircleAvatar(radius: 24, backgroundColor: primary, child: Icon(c.icon, color: Colors.white, size: 22)),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        c.name,
-                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                            .map((c) => Expanded(
+                                  child: InkWell(
+                                    onTap: () {
+                                      s.openSearch(c.name);
+                                      final mainShellState = context.findAncestorStateOfType<_MainShellState>();
+                                      mainShellState?.setState(() {
+                                        mainShellState._currentIndex = 1;
+                                      });
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 1),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CircleAvatar(radius: 22, backgroundColor: primary, child: Icon(c.icon, color: Colors.white, size: 20)),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            c.name,
+                                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
                                       ),
-                                    ]),
+                                    ),
                                   ),
                                 ))
                             .toList(),
@@ -618,30 +635,55 @@ class HomeScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       elevation: 2,
                     ),
-                    onPressed: () => s.openSearch('Semua'),
+                    onPressed: () {
+                      s.openSearch('Semua');
+                      final mainShellState = context.findAncestorStateOfType<_MainShellState>();
+                      mainShellState?.setState(() {
+                        mainShellState._currentIndex = 1;
+                      });
+                    },
                     child: const Text('Lihat Semua >', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
                 ),
               ),
               const SizedBox(height: 24),
               
-              // --- 5. Bagian Paling Diminati ---
+              // --- 5. Bagian Paling Diminati (Responsif Auto-Adapt) ---
               const SectionHeader('Paling Diminati'),
               const SizedBox(height: 12),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: popular.map((item) {
-                      double itemWidth = (constraints.maxWidth - (4 * 14)) / 5;
-                      if (itemWidth < 140) itemWidth = (constraints.maxWidth - 14) / 2;
-                      return SizedBox(
-                        width: itemWidth,
-                        child: _PopularCard(item, cardWidth: itemWidth),
-                      );
-                    }).toList(),
-                  );
+                  bool isMobileView = constraints.maxWidth < 650;
+                  if (isMobileView) {
+                    return SizedBox(
+                      height: 310,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: popular.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 14),
+                        itemBuilder: (context, index) {
+                          const double cardWidth = 180;
+                          return SizedBox(
+                            width: cardWidth,
+                            child: _PopularCard(popular[index], cardWidth: cardWidth),
+                          );
+                        },
+                      ),
+                    );
+                  } else {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: popular.map((item) {
+                        double itemWidth = (constraints.maxWidth - (2 * 14)) / 3;
+                        return SizedBox(
+                          width: itemWidth,
+                          child: _PopularCard(item, cardWidth: itemWidth),
+                        );
+                      }).toList(),
+                    );
+                  }
                 },
               ),
               const SizedBox(height: 32),

@@ -201,7 +201,7 @@ class _SearchScreenState extends State<SearchScreen> {
       const SizedBox(height: 8),
       Text('${list.length} kegiatan ditemukan', style: TextStyle(color: muted(context), fontSize: 12)),
       const SizedBox(height: 14),
-      
+
       if (list.isEmpty)
         const SizedBox(
             height: 300,
@@ -215,7 +215,7 @@ class _SearchScreenState extends State<SearchScreen> {
             maxCrossAxisExtent: 260,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 0.65,
+            mainAxisExtent: 268, // tinggi kartu tetap, tidak ada jarak kosong lagi
           ),
           itemBuilder: (context, index) {
             return _SearchEventGridCard(list[index]);
@@ -291,9 +291,9 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                         topRight: Radius.circular(16),
                       ),
                       child: SizedBox(
-                        height: 140,
+                        height: 115,
                         width: double.infinity,
-                        child: EventImage(widget.e, width: double.infinity, height: 140, radius: 0),
+                        child: EventImage(widget.e, width: double.infinity, height: 115, radius: 0),
                       ),
                     ),
                     Positioned(
@@ -301,93 +301,96 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                       left: 0,
                       right: 0,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
                         color: Colors.black.withOpacity(0.65),
                         child: Text(
                           _getDynamicDeadlineText(widget.e.date),
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500),
+                          style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w500),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ),
                   ],
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(9, 6, 9, 6),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: softOf(context),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            widget.e.category,
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              color: catInfo.color,
-                            ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: softOf(context),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          widget.e.category,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: catInfo.color,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
+                      ),
+                      const SizedBox(height: 4),
+                      // Tinggi judul dibuat tetap (2 baris) supaya tanggal sejajar di semua kartu
+                      SizedBox(
+                        height: 30,
+                        child: Text(
                           widget.e.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 11.5,
-                            height: 1.15,
+                            height: 1.2,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          widget.e.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 9.5,
-                            color: muted(context),
-                            height: 1.15,
-                          ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.e.description,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: muted(context),
+                          height: 1.15,
                         ),
-                        const Spacer(),
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today_outlined, size: 10, color: muted(context)),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                fmtDate(widget.e.date),
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis, // Diperbaiki dari TextBorderOverflow.ellipsis
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 1),
-                        Row(
-                          children: [
-                            Icon(Icons.group_outlined, size: 10, color: muted(context)),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${s.participants(widget.e)} Relawan',
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_today_outlined, size: 10, color: muted(context)),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              fmtDate(widget.e.date),
                               style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        StatusChip(
-                          widget.e.priceText,
-                          widget.e.isPaid ? const Color(0xFFE65100) : const Color(0xFF2E7D32),
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(Icons.group_outlined, size: 10, color: muted(context)),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${s.participants(widget.e)} Relawan',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      StatusChip(
+                        widget.e.priceText,
+                        widget.e.isPaid ? const Color(0xFFE65100) : const Color(0xFF2E7D32),
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'registration_success_screen.dart';
+import 'registration_form_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel e;
@@ -31,30 +32,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
     super.dispose();
   }
 
-  Future<void> _register(BuildContext context) async {
-    final s = context.read<AppState>();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Daftar kegiatan ini?'),
-        content: Text('${widget.e.title}\n${fmtLongDate(widget.e.date)} - ${widget.e.time}\n${widget.e.location}'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Daftar')),
-        ],
-      ),
-    );
-    if (ok != true || !context.mounted) return;
-    final err = s.registerEvent(widget.e);
-    if (err != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
-      return;
-    }
+  void _register(BuildContext context) {
+    // Buka halaman biodata dulu. Jika berbayar, setelah biodata lanjut ke pembayaran.
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => RegistrationSuccessScreen(s.regOf(widget.e.id)!, fresh: true, fromDetail: true),
-      ),
+      MaterialPageRoute(builder: (_) => RegistrationFormScreen(widget.e)),
     );
   }
 
@@ -80,7 +62,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
     } else if (s.remaining(widget.e) <= 0) {
       btnText = 'Kuota Penuh';
     } else {
-      btnText = 'Jadi Relawan';
+      btnText = 'Daftar Relawan';
       onTap = () => _register(context);
     }
 
@@ -469,7 +451,7 @@ class RegistrationCard extends StatelessWidget {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, height: 1.3),
           ),
           const SizedBox(height: 16),
-          
+
           // Kotak Informasi Tanggal & Lokasi
           Container(
             padding: const EdgeInsets.all(16),

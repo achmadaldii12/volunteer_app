@@ -26,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => s.user == null ? const LoginScreen() : const MainShell(),
+        builder: (_) => s.user == null ? LoginScreen() : MainShell(),
       ),
     );
   }
@@ -212,230 +212,225 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          image: const DecorationImage(
-            image: AssetImage('assets/images/bg_auth.jpg'),
-            fit: BoxFit.cover,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFE53935), Color(0xFFB71C1C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          color: Colors.grey.shade900, // Warna cadangan jika gambar belum termuat
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.4), // Efek gelap transparan agar form kontras
-          ),
-          child: SafeArea(
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: Form(
-                      key: _form,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Center(
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.volunteer_activism, size: 45, color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Selamat Datang',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Masuk untuk melanjutkan aksi kebaikanmu',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white70, fontSize: 12.5),
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(18),
+        child: SafeArea(
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Form(
+                    key: _form,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const Text(
-                                  'Masuk Sebagai',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _selectedRole = 'volunteer'),
-                                        child: AnimatedContainer(
-                                          duration: const Duration(milliseconds: 200),
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: _selectedRole == 'volunteer'
-                                                ? primary
-                                                : (isDark(context) ? Colors.grey[800] : Colors.grey[100]),
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.person_outline,
-                                                size: 15,
-                                                color: _selectedRole == 'volunteer' ? Colors.white : Colors.grey[600],
-                                              ),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                'Relawan',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12,
-                                                  color: _selectedRole == 'volunteer' ? Colors.white : Colors.grey[700],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _selectedRole = 'organizer'),
-                                        child: AnimatedContainer(
-                                          duration: const Duration(milliseconds: 200),
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: _selectedRole == 'organizer'
-                                                ? primary
-                                                : (isDark(context) ? Colors.grey[800] : Colors.grey[100]),
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.business_outlined,
-                                                size: 15,
-                                                color: _selectedRole == 'organizer' ? Colors.white : Colors.grey[600],
-                                              ),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                'Penyelenggara',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12,
-                                                  color: _selectedRole == 'organizer' ? Colors.white : Colors.grey[700],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 14),
-                                AppTextField(
-                                  'Email',
-                                  Icons.mail_outline,
-                                  controller: _email,
-                                  validator: validateEmail,
-                                  keyboard: TextInputType.emailAddress,
-                                ),
-                                const SizedBox(height: 4),
-                                AppTextField(
-                                  'Password',
-                                  Icons.lock_outline,
-                                  controller: _pass,
-                                  password: true,
-                                  validator: validatePassword,
-                                ),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed: () {
-                                      _email.text = 'aldi@email.com';
-                                      _pass.text = '123456';
-                                    },
-                                    child: Text(
-                                      'Isi akun demo',
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        color: primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                PrimaryButton('Login', onTap: _submit),
-                              ],
-                            ),
+                            child: const Icon(Icons.volunteer_activism, size: 45, color: Colors.white),
                           ),
-                          const SizedBox(height: 12),
-                          const Center(
-                            child: Text(
-                              'atau masuk dengan',
-                              style: TextStyle(fontSize: 11.5, color: Colors.white70),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _socialBtn(
-                                const Text(
-                                  'G',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFFDB4437),
-                                  ),
-                                ),
-                                () => _social('Google'),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Selamat Datang',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Masuk untuk melanjutkan aksi kebaikanmu',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white70, fontSize: 12.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
                               ),
-                              const SizedBox(width: 12),
-                              _socialBtn(const Icon(Icons.apple, size: 22, color: Colors.black87), () => _social('Apple')),
                             ],
                           ),
-                          const SizedBox(height: 14),
-                          _buildAuthLink(
-                            'Belum punya akun? ',
-                            'Daftar',
-                            Colors.white,
-                            () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                              );
-                            },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'Masuk Sebagai',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => setState(() => _selectedRole = 'volunteer'),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        padding: const EdgeInsets.symmetric(vertical: 10),
+                                        decoration: BoxDecoration(
+                                          color: _selectedRole == 'volunteer'
+                                              ? primary
+                                              : (isDark(context) ? Colors.grey[800] : Colors.grey[100]),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.person_outline,
+                                              size: 15,
+                                              color: _selectedRole == 'volunteer' ? Colors.white : Colors.grey[600],
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              'Relawan',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                                color: _selectedRole == 'volunteer' ? Colors.white : Colors.grey[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => setState(() => _selectedRole = 'organizer'),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        padding: const EdgeInsets.symmetric(vertical: 10),
+                                        decoration: BoxDecoration(
+                                          color: _selectedRole == 'organizer'
+                                              ? primary
+                                              : (isDark(context) ? Colors.grey[800] : Colors.grey[100]),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.business_outlined,
+                                              size: 15,
+                                              color: _selectedRole == 'organizer' ? Colors.white : Colors.grey[600],
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              'Penyelenggara',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                                color: _selectedRole == 'organizer' ? Colors.white : Colors.grey[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              AppTextField(
+                                'Email',
+                                Icons.mail_outline,
+                                controller: _email,
+                                validator: validateEmail,
+                                keyboard: TextInputType.emailAddress,
+                              ),
+                              const SizedBox(height: 4),
+                              AppTextField(
+                                'Password',
+                                Icons.lock_outline,
+                                controller: _pass,
+                                password: true,
+                                validator: validatePassword,
+                              ),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {
+                                    _email.text = 'aldi@email.com';
+                                    _pass.text = '123456';
+                                  },
+                                  child: Text(
+                                    'Isi akun demo',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              PrimaryButton('Login', onTap: _submit),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Center(
+                          child: Text(
+                            'atau masuk dengan',
+                            style: TextStyle(fontSize: 11.5, color: Colors.white70),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _socialBtn(
+                              const Text(
+                                'G',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFDB4437),
+                                ),
+                              ),
+                              () => _social('Google'),
+                            ),
+                            const SizedBox(width: 12),
+                            _socialBtn(const Icon(Icons.apple, size: 22, color: Colors.black87), () => _social('Apple')),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _buildAuthLink(
+                          'Belum punya akun? ',
+                          'Daftar',
+                          Colors.white,
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -508,126 +503,121 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          image: const DecorationImage(
-            image: AssetImage('assets/images/bg_auth.jpg'),
-            fit: BoxFit.cover,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFE53935), Color(0xFFB71C1C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          color: Colors.grey.shade900,
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.4),
-          ),
-          child: SafeArea(
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: Form(
-                      key: _form,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 2),
-                              child: IconButton(
-                                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
-                                onPressed: () => Navigator.pop(context),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
+        child: SafeArea(
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Form(
+                    key: _form,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 2),
+                            child: IconButton(
+                              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
+                              onPressed: () => Navigator.pop(context),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                             ),
                           ),
-                          Center(
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.person_add_outlined, size: 36, color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          const Text(
-                            'Daftar Akun',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          const SizedBox(height: 2),
-                          const Text(
-                            'Bergabunglah dengan komunitas\nvolunteer sekarang!',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white70, fontSize: 12),
-                          ),
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.all(16),
+                        ),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                AppTextField(
-                                  'Nama Lengkap',
-                                  Icons.person_outline,
-                                  controller: _name,
-                                  validator: (v) => validateRequired(v, 'Nama'),
-                                ),
-                                const SizedBox(height: 4),
-                                AppTextField(
-                                  'Email',
-                                  Icons.mail_outline,
-                                  controller: _email,
-                                  validator: validateEmail,
-                                  keyboard: TextInputType.emailAddress,
-                                ),
-                                const SizedBox(height: 4),
-                                AppTextField(
-                                  'Password',
-                                  Icons.lock_outline,
-                                  controller: _pass,
-                                  password: true,
-                                  validator: validatePassword,
-                                ),
-                                const SizedBox(height: 4),
-                                AppTextField(
-                                  'Konfirmasi Password',
-                                  Icons.lock_outline,
-                                  controller: _confirm,
-                                  password: true,
-                                  validator: (v) => v != _pass.text ? 'Konfirmasi password tidak sama' : null,
-                                ),
-                                const SizedBox(height: 10),
-                                PrimaryButton('Daftar', onTap: _submit),
-                              ],
-                            ),
+                            child: const Icon(Icons.person_add_outlined, size: 36, color: Colors.white),
                           ),
-                          const SizedBox(height: 10),
-                          _buildAuthLink(
-                            'Sudah punya akun? ',
-                            'Login',
-                            Colors.white,
-                            () => Navigator.pop(context),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Daftar Akun',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Bergabunglah dengan komunitas\nvolunteer sekarang!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isDark(context) ? const Color(0xFF1E1E1E) : Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              AppTextField(
+                                'Nama Lengkap',
+                                Icons.person_outline,
+                                controller: _name,
+                                validator: (v) => validateRequired(v, 'Nama'),
+                              ),
+                              const SizedBox(height: 4),
+                              AppTextField(
+                                'Email',
+                                Icons.mail_outline,
+                                controller: _email,
+                                validator: validateEmail,
+                                keyboard: TextInputType.emailAddress,
+                              ),
+                              const SizedBox(height: 4),
+                              AppTextField(
+                                'Password',
+                                Icons.lock_outline,
+                                controller: _pass,
+                                password: true,
+                                validator: validatePassword,
+                              ),
+                              const SizedBox(height: 4),
+                              AppTextField(
+                                'Konfirmasi Password',
+                                Icons.lock_outline,
+                                controller: _confirm,
+                                password: true,
+                                validator: (v) => v != _pass.text ? 'Konfirmasi password tidak sama' : null,
+                              ),
+                              const SizedBox(height: 10),
+                              PrimaryButton('Daftar', onTap: _submit),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildAuthLink(
+                          'Sudah punya akun? ',
+                          'Login',
+                          Colors.white,
+                          () => Navigator.pop(context),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -215,10 +215,13 @@ class _SearchScreenState extends State<SearchScreen> {
             maxCrossAxisExtent: 260,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            mainAxisExtent: 268, // tinggi kartu tetap, tidak ada jarak kosong lagi
+            mainAxisExtent: 285,
           ),
           itemBuilder: (context, index) {
-            return _SearchEventGridCard(list[index]);
+            // Menggunakan RepaintBoundary agar render filter kategori menjadi sangat cepat dan instan tanpa jeda
+            return RepaintBoundary(
+              child: _SearchEventGridCard(list[index]),
+            );
           },
         ),
     ]);
@@ -334,7 +337,6 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      // Tinggi judul dibuat tetap (2 baris) supaya tanggal sejajar di semua kartu
                       SizedBox(
                         height: 30,
                         child: Text(

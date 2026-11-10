@@ -34,28 +34,121 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = isDark(context);
+    final navBackgroundColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Event'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Komunitas'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: navBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 10,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: SizedBox(
+            height: 60,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // Item Navigasi Kiri & Kanan
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(0, Icons.home_rounded, 'Beranda'),
+                    _buildNavItem(1, Icons.event_rounded, 'Event'),
+                    const SizedBox(width: 56), // Ruang kosong untuk tombol plus di tengah
+                    _buildNavItem(3, Icons.people_rounded, 'Komunitas'),
+                    _buildNavItem(4, Icons.person_rounded, 'Profil'),
+                  ],
+                ),
+                // Tombol Plus Kecil dengan Lingkaran Putih di Luar (Sesuai Gambar Referensi)
+                Positioned(
+                  top: -16,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _currentIndex = 2; // Mengarahkan ke tab Riwayat / Aktivitas Saya
+                      });
+                    },
+                    child: Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: navBackgroundColor, // Lingkaran putih (atau warna background) di luar
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(3.5), // Ketebalan lingkaran putih/background
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFFE53935), // Warna merah tombol plus
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = _currentIndex == index;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    return InkWell(
+      onTap: () => setState(() => _currentIndex = index),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? primaryColor : Colors.grey.shade400,
+              size: 22,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? primaryColor : Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -554,7 +647,7 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- 3. Kategori (Diperbaiki agar muat & tidak terpotong) ---
+              // --- 3. Kategori ---
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
@@ -648,7 +741,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               
-              // --- 5. Bagian Paling Diminati (Responsif Auto-Adapt) ---
+              // --- 5. Bagian Paling Diminati ---
               const SectionHeader('Paling Diminati'),
               const SizedBox(height: 12),
               LayoutBuilder(
@@ -728,16 +821,18 @@ class HomeScreen extends StatelessWidget {
                   if (cardWidth < 220) cardWidth = constraints.maxWidth;
 
                   return constraints.maxWidth > 700
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: kBlogArticles
-                              .take(3)
-                              .map((article) => SizedBox(
-                                    width: cardWidth,
-                                    child: _GridArticleCard(article),
-                                  ))
-                              .toList(),
+                      ? IntrinsicHeight(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: kBlogArticles
+                                .take(3)
+                                .map((article) => SizedBox(
+                                      width: cardWidth,
+                                      child: _GridArticleCard(article),
+                                    ))
+                                .toList(),
+                          ),
                         )
                       : ListView.separated(
                           shrinkWrap: true,
@@ -806,7 +901,7 @@ class _GridArticleCard extends StatelessWidget {
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: SizedBox(
-                height: 200,
+                height: 180,
                 width: double.infinity,
                 child: Image.asset(
                   article.imageUrl,
@@ -815,30 +910,32 @@ class _GridArticleCard extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    article.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, height: 1.3),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    article.excerpt,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: muted(context), height: 1.3),
-                  ),
-                  const SizedBox(height: 12),
-                  const Align(
-                    alignment: Alignment.centerRight,
-                    child: Text('Baca lebih lanjut', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFFE53935))),
-                  ),
-                ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      article.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, height: 1.3),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      article.excerpt,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12, color: muted(context), height: 1.3),
+                    ),
+                    const Spacer(),
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: Text('Baca lebih lanjut', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFFE53935))),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

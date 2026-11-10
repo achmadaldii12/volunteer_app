@@ -7,7 +7,7 @@ import '../models/models.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'registration_success_screen.dart';
-import 'registration_form_screen.dart';
+import 'registration_screens.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel e;

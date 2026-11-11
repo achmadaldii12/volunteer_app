@@ -229,6 +229,7 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -278,7 +279,6 @@ class _AchievementScreenState extends State<AchievementScreen> {
   @override
   void initState() {
     super.initState();
-    // Tampilkan popup penghargaan yang belum sempat ditampilkan (poin / badge / level)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) showPendingCelebrations(context);
     });
@@ -306,19 +306,17 @@ class _AchievementScreenState extends State<AchievementScreen> {
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
               children: [
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
-                    child: Column(children: [
-                      _header(context, s, u),
-                      _badgesSection(context, s, u),
-                      _leaderboardSection(context, s),
-                      _myPositionCard(context, s),
-                      _vomSection(context, s),
-                      _historySection(context, s),
-                      _infoSection(context, s),
-                    ]),
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _header(context, s, u),
+                    _badgesSection(context, s, u),
+                    _leaderboardSection(context, s),
+                    _myPositionCard(context, s),
+                    _vomSection(context, s),
+                    _historySection(context, s),
+                    _infoSection(context, s),
+                  ],
                 ),
               ],
             ),
@@ -346,6 +344,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
     const valueStyle = TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 17);
 
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -696,6 +695,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
     if (me.rank > 10) msg = 'Di luar 10 besar • $msg';
 
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1238,51 +1238,54 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
     return Scaffold(
       backgroundColor: _bg(context),
       appBar: AppBar(backgroundColor: _bg(context), title: const Text('Riwayat Poin')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 24), children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [_blue, _blueLight]),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(children: [
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('Total Poin Terverifikasi',
-                        style: TextStyle(color: Colors.white70, fontSize: 11.5)),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [_blue, _blueLight]),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(children: [
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Text('Total Poin Terverifikasi',
+                          style: TextStyle(color: Colors.white70, fontSize: 11.5)),
+                      const SizedBox(height: 4),
+                      Text(fmtNum(verified),
+                          style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800)),
+                    ]),
+                  ),
+                  Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                    const Text('Menunggu verifikasi', style: TextStyle(color: Colors.white70, fontSize: 11)),
                     const SizedBox(height: 4),
-                    Text(fmtNum(verified),
-                        style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800)),
+                    Text('+${fmtNum(pending)}',
+                        style: const TextStyle(color: _gold, fontSize: 18, fontWeight: FontWeight.w800)),
                   ]),
-                ),
-                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  const Text('Menunggu verifikasi', style: TextStyle(color: Colors.white70, fontSize: 11)),
-                  const SizedBox(height: 4),
-                  Text('+${fmtNum(pending)}',
-                      style: const TextStyle(color: _gold, fontSize: 18, fontWeight: FontWeight.w800)),
                 ]),
-              ]),
-            ),
-            const SizedBox(height: 14),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(children: [chip('Semua', 0), chip('Terverifikasi', 1), chip('Menunggu', 2)]),
-            ),
-            const SizedBox(height: 12),
-            if (list.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                child: Center(
-                  child: Text('Tidak ada riwayat pada filter ini.', style: TextStyle(color: muted(context))),
-                ),
-              )
-            else
-              for (final e in list) _HistoryTile(e),
-          ]),
-        ),
+              ),
+              const SizedBox(height: 14),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(children: [chip('Semua', 0), chip('Terverifikasi', 1), chip('Menunggu', 2)]),
+              ),
+              const SizedBox(height: 12),
+              if (list.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: Text('Tidak ada riwayat pada filter ini.', style: TextStyle(color: muted(context))),
+                  ),
+                )
+              else
+                for (final e in list) _HistoryTile(e),
+            ],
+          ),
+        ],
       ),
     );
   }

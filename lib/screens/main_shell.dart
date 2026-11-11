@@ -27,7 +27,7 @@ class _MainShellState extends State<MainShell> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const SearchScreen(),
-    const MyActivitiesScreen(),
+    const MyActivitiesScreen(), // Indeks 2: Riwayat / Aktivitas Saya
     const CommunityScreen(),
     const ProfileScreen(),
   ];
@@ -36,7 +36,6 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final isDarkMode = isDark(context);
     final navBackgroundColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       body: IndexedStack(
@@ -57,61 +56,14 @@ class _MainShellState extends State<MainShell> {
         child: SafeArea(
           child: SizedBox(
             height: 60,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // Item Navigasi Kiri & Kanan
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavItem(0, Icons.home_rounded, 'Beranda'),
-                    _buildNavItem(1, Icons.event_rounded, 'Event'),
-                    const SizedBox(width: 56), // Ruang kosong untuk tombol plus di tengah
-                    _buildNavItem(3, Icons.people_rounded, 'Komunitas'),
-                    _buildNavItem(4, Icons.person_rounded, 'Profil'),
-                  ],
-                ),
-                // Tombol Plus Kecil dengan Lingkaran Putih di Luar (Sesuai Gambar Referensi)
-                Positioned(
-                  top: -16,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _currentIndex = 2; // Mengarahkan ke tab Riwayat / Aktivitas Saya
-                      });
-                    },
-                    child: Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: navBackgroundColor, // Lingkaran putih (atau warna background) di luar
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(3.5), // Ketebalan lingkaran putih/background
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFFE53935), // Warna merah tombol plus
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                _buildNavItem(0, Icons.home_rounded, 'Beranda'),
+                _buildNavItem(1, Icons.event_rounded, 'Event'),
+                _buildNavItem(2, Icons.history_rounded, 'Riwayat'), // Tombol Tengah (Riwayat)
+                _buildNavItem(3, Icons.people_rounded, 'Komunitas'),
+                _buildNavItem(4, Icons.person_rounded, 'Profil'),
               ],
             ),
           ),

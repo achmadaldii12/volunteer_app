@@ -19,63 +19,176 @@ class CertificateScreen extends StatefulWidget {
 class _CertificateScreenState extends State<CertificateScreen> {
   int stars = 5;
   int selectedCertIndex = 0;
-  final _ctrl = TextEditingController();
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: selectedCertIndex);
+  }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  // Fungsi nyata untuk mendownload PDF ke komputer
-  Future<void> _downloadPdf(BuildContext context, String eventTitle, String userName, String dateStr, int hours) async {
+  // Fungsi untuk membuat dan mengunduh PDF lengkap dengan tanda tangan digital
+  Future<void> _downloadPdf(BuildContext context, String eventTitle, String participantName, String dateStr, int hours) async {
     final pdf = pw.Document();
 
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4.landscape,
+        margin: const pw.EdgeInsets.all(24),
         build: (pw.Context context) {
           return pw.Container(
-            padding: const pw.EdgeInsets.all(32),
+            padding: const pw.EdgeInsets.all(24),
             decoration: pw.BoxDecoration(
-              border: pw.Border.all(color: PdfColors.amber, width: 6),
-              color: PdfColors.grey100,
+              color: PdfColors.white,
+              border: pw.Border.all(color: PdfColors.amber800, width: 6),
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
             ),
             child: pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.center,
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('SERTIFIKAT PENGHARGAAN RELAWAN',
-                    style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.brown)),
-                pw.SizedBox(height: 10),
-                pw.Text('Diberikan dengan bangga kepada:', style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey700)),
-                pw.SizedBox(height: 10),
-                pw.Text(userName,
-                    style: pw.TextStyle(fontSize: 28, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo)),
-                pw.SizedBox(height: 15),
-                pw.Text('Atas partisipasi aktif dan dedikasinya sebagai relawan dalam kegiatan:',
-                    style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
-                pw.SizedBox(height: 8),
-                pw.Text(eventTitle,
-                    style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
-                pw.SizedBox(height: 8),
-                pw.Text('Tanggal Pelaksanaan: $dateStr • Kontribusi: $hours Jam',
-                    style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey800)),
-                pw.SizedBox(height: 30),
+                // Header Sertifikat
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
+                    pw.Text('VOLUNTEER APP OFFICIAL', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.grey600)),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.amber100,
+                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                      ),
+                      child: pw.Text('SERTIFIKAT RESMI', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.amber900)),
+                    ),
+                  ],
+                ),
+
+                // Konten Utama Sertifikat
+                pw.Column(
+                  children: [
+                    pw.Text('SERTIFIKAT PENGHARGAAN RELAWAN',
+                        style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.brown900, letterSpacing: 1.2)),
+                    pw.SizedBox(height: 4),
+                    pw.Text('Diberikan dengan bangga kepada:',
+                        style: pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+                    pw.SizedBox(height: 10),
+                    
+                    // Nama Peserta
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                      decoration: const pw.BoxDecoration(
+                        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.indigo, width: 2)),
+                      ),
+                      child: pw.Text(
+                        participantName.toUpperCase(),
+                        style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo900),
+                      ),
+                    ),
+                    pw.SizedBox(height: 10),
+                    
+                    pw.Text('Atas partisipasi aktif, dedikasi, dan kontribusinya sebagai relawan dalam kegiatan:',
+                        style: pw.TextStyle(fontSize: 11, color: PdfColors.grey700), textAlign: pw.TextAlign.center),
+                    pw.SizedBox(height: 6),
+                    
+                    // Judul Event
+                    pw.Text(
+                      eventTitle,
+                      style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                    pw.SizedBox(height: 6),
+                    
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.grey200,
+                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                      ),
+                      child: pw.Text(
+                        'Tanggal Pelaksanaan: $dateStr  •  Total Kontribusi: $hours Jam',
+                        style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.grey800),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Bagian Tanda Tangan & Stempel Resmi di Bawah
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    // Tanda Tangan Panitia
                     pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
-                        pw.Container(width: 120, height: 1, color: PdfColors.black),
+                        pw.Text('Mengetahui,', style: pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
                         pw.SizedBox(height: 4),
-                        pw.Text('Panitia Pelaksana', style: const pw.TextStyle(fontSize: 10)),
+                        pw.SizedBox(
+                          height: 35,
+                          width: 120,
+                          child: pw.CustomPaint(
+                            size: const PdfPoint(120, 35),
+                            painter: (PdfGraphics canvas, PdfPoint size) {
+                              canvas.setColor(PdfColors.blue900);
+                              canvas.setLineWidth(1.5);
+                              canvas.moveTo(10, 25);
+                              canvas.curveTo(30, 5, 40, 35, 60, 15);
+                              canvas.curveTo(70, 5, 90, 30, 110, 10);
+                              canvas.strokePath();
+                            },
+                          ),
+                        ),
+                        pw.Container(width: 140, height: 1, color: PdfColors.black),
+                        pw.SizedBox(height: 4),
+                        pw.Text('Panitia Pelaksana Kegiatan', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
                       ],
                     ),
+
+                    // Stempel / Badge Pengesahan Tengah
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(8),
+                      decoration: pw.BoxDecoration(
+                        shape: pw.BoxShape.circle,
+                        border: pw.Border.all(color: PdfColors.amber800, width: 2),
+                      ),
+                      child: pw.Column(
+                        mainAxisSize: pw.MainAxisSize.min,
+                        children: [
+                          pw.Text('VERIFIED', style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold, color: PdfColors.amber900)),
+                          pw.Text('LEGAL', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.amber900)),
+                        ],
+                      ),
+                    ),
+
+                    // Tanda Tangan Direktur Program
                     pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
-                        pw.Container(width: 120, height: 1, color: PdfColors.black),
+                        pw.Text('Surabaya, ${DateTime.now().year}', style: pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
                         pw.SizedBox(height: 4),
-                        pw.Text('Direktur Program', style: const pw.TextStyle(fontSize: 10)),
+                        pw.SizedBox(
+                          height: 35,
+                          width: 120,
+                          child: pw.CustomPaint(
+                            size: const PdfPoint(120, 35),
+                            painter: (PdfGraphics canvas, PdfPoint size) {
+                              canvas.setColor(PdfColors.indigo900);
+                              canvas.setLineWidth(1.5);
+                              canvas.moveTo(15, 10);
+                              canvas.curveTo(35, 30, 50, 5, 75, 25);
+                              canvas.curveTo(85, 35, 100, 10, 115, 20);
+                              canvas.strokePath();
+                            },
+                          ),
+                        ),
+                        pw.Container(width: 140, height: 1, color: PdfColors.black),
+                        pw.SizedBox(height: 4),
+                        pw.Text('Direktur Program Relawan', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
                       ],
                     ),
                   ],
@@ -95,6 +208,8 @@ class _CertificateScreenState extends State<CertificateScreen> {
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
     final certs = s.attendedRegs;
+    final String currentUserName = s.user?.name ?? 'Achmad Aldi Saputra';
+
     if (selectedCertIndex >= certs.length && certs.isNotEmpty) {
       selectedCertIndex = 0;
     }
@@ -168,20 +283,27 @@ class _CertificateScreenState extends State<CertificateScreen> {
                       ),
                       const SizedBox(height: 10),
 
+                      // Slider Preview Sertifikat Aktif (Terhubung dengan PageController)
                       SizedBox(
                         height: 240,
                         child: PageView.builder(
+                          controller: _pageController,
                           itemCount: certs.length,
-                          onPageChanged: (i) => setState(() => selectedCertIndex = i),
+                          onPageChanged: (i) {
+                            setState(() {
+                              selectedCertIndex = i;
+                            });
+                          },
                           itemBuilder: (_, i) {
                             final reg = certs[i];
                             final ev = s.eventById(reg.eventId);
                             return _CertificateCard(
                               registration: reg,
+                              userName: currentUserName,
                               onSave: () => _downloadPdf(
                                 context,
                                 ev?.title ?? 'Sertifikat',
-                                s.user?.name ?? 'Achmad Aldi Saputra',
+                                currentUserName,
                                 ev != null ? fmtLongDate(ev.date) : '2027',
                                 ev?.hours ?? 5,
                               ),
@@ -213,17 +335,29 @@ class _CertificateScreenState extends State<CertificateScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
                       ),
                       const SizedBox(height: 10),
+                      
+                      // Daftar Item Folder (Ketika diklik, preview atas akan otomatis berpindah)
                       for (var i = 0; i < certs.length; i++)
                         _FolderItemTile(
                           registration: certs[i],
                           isSelected: i == selectedCertIndex,
-                          onTap: () => setState(() => selectedCertIndex = i),
+                          onTap: () {
+                            setState(() {
+                              selectedCertIndex = i;
+                            });
+                            // Menggeser PageView ke halaman index yang diklik secara halus
+                            _pageController.animateToPage(
+                              i,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
                           onSave: () {
                             final ev = s.eventById(certs[i].eventId);
                             _downloadPdf(
                               context,
                               ev?.title ?? 'Sertifikat',
-                              s.user?.name ?? 'Achmad Aldi Saputra',
+                              currentUserName,
                               ev != null ? fmtLongDate(ev.date) : '2027',
                               ev?.hours ?? 5,
                             );
@@ -280,9 +414,10 @@ class _CertificateScreenState extends State<CertificateScreen> {
 
 class _CertificateCard extends StatelessWidget {
   final Registration registration;
+  final String userName;
   final VoidCallback onSave;
 
-  const _CertificateCard({required this.registration, required this.onSave});
+  const _CertificateCard({required this.registration, required this.userName, required this.onSave});
 
   @override
   Widget build(BuildContext context) {
@@ -317,7 +452,7 @@ class _CertificateCard extends StatelessWidget {
           const Text('diberikan kepada', style: TextStyle(fontSize: 10, color: Colors.black54)),
           const SizedBox(height: 2),
           Text(
-            s.user?.name ?? 'Achmad Aldi Saputra',
+            userName,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
           ),
           const SizedBox(height: 6),

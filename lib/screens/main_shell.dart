@@ -24,18 +24,24 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
+  // Method publik untuk mengubah tab secara aman
+  void changeTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = isDark(context);
     final navBackgroundColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
 
-    // Daftar layar dibuat di dalam build agar callback onNavigateToEvent dapat merubah state index dengan benar
     final List<Widget> screens = [
       const HomeScreen(),
       const SearchScreen(),
       MyActivitiesScreen(
-        onNavigateToEvent: () => setState(() => _currentIndex = 1),
-      ), // Indeks 2: Aktivitas Saya -> Berpindah ke Tab Event (indeks 1)
+        onNavigateToEvent: () => changeTab(1),
+      ),
       const CommunityScreen(),
       const ProfileScreen(),
     ];
@@ -64,7 +70,7 @@ class _MainShellState extends State<MainShell> {
               children: [
                 _buildNavItem(0, Icons.home_rounded, 'Beranda'),
                 _buildNavItem(1, Icons.event_rounded, 'Event'),
-                _buildNavItem(2, Icons.history_rounded, 'Riwayat'), // Tombol Tengah (Riwayat)
+                _buildNavItem(2, Icons.history_rounded, 'Riwayat'),
                 _buildNavItem(3, Icons.people_rounded, 'Komunitas'),
                 _buildNavItem(4, Icons.person_rounded, 'Profil'),
               ],
@@ -80,7 +86,7 @@ class _MainShellState extends State<MainShell> {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return InkWell(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () => changeTab(index),
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -495,7 +501,7 @@ class HomeScreen extends StatelessWidget {
                       icon: const Icon(Icons.emoji_events, color: Colors.amber, size: 22),
                       tooltip: 'Achievement & Ranking',
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => AchievementScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const AchievementScreen()));
                       },
                     ),
                     IconButton(
@@ -518,9 +524,7 @@ class HomeScreen extends StatelessWidget {
           onTap: () {
             s.openSearch('Semua');
             final mainShellState = context.findAncestorStateOfType<_MainShellState>();
-            mainShellState?.setState(() {
-              mainShellState._currentIndex = 1;
-            });
+            mainShellState?.changeTab(1);
           },
           child: ClipRRect(
             borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
@@ -635,9 +639,7 @@ class HomeScreen extends StatelessWidget {
                                     onTap: () {
                                       s.openSearch(c.name);
                                       final mainShellState = context.findAncestorStateOfType<_MainShellState>();
-                                      mainShellState?.setState(() {
-                                        mainShellState._currentIndex = 1;
-                                      });
+                                      mainShellState?.changeTab(1);
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 1),
@@ -686,9 +688,7 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () {
                       s.openSearch('Semua');
                       final mainShellState = context.findAncestorStateOfType<_MainShellState>();
-                      mainShellState?.setState(() {
-                        mainShellState._currentIndex = 1;
-                      });
+                      mainShellState?.changeTab(1);
                     },
                     child: const Text('Lihat Semua >', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   ),

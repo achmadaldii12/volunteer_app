@@ -8,7 +8,11 @@ import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'event_detail_screen.dart';
 import 'registration_success_screen.dart';
-import 'achievement_screen.dart';
+
+// Fungsi bantuan untuk menampilkan perayaan/pencapaian poin jika ada
+Future<void> showPendingCelebrations(BuildContext context) async {
+  // Bisa dikosongkan atau diisi logika pop-up gamifikasi jika diperlukan
+}
 
 class MyActivitiesScreen extends StatelessWidget {
   const MyActivitiesScreen({super.key, this.onNavigateToEvent});

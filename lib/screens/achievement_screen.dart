@@ -191,8 +191,8 @@ class _AchievementScreenState extends State<AchievementScreen> {
       builder: (_) => AlertDialog(
         title: Row(children: [
           CircleAvatar(
-              backgroundColor: (done ? a.color : Colors.grey).withOpacity(.18),
-              child: Icon(done ? a.icon : Icons.lock_outline, color: done ? a.color : Colors.grey)),
+              backgroundColor: (done ? a.color : _redPrimary).withOpacity(.18),
+              child: Icon(done ? a.icon : Icons.lock_outline, color: done ? a.color : _redPrimary)),
           const SizedBox(width: 12),
           Expanded(child: Text(a.name)),
         ]),
@@ -204,8 +204,8 @@ class _AchievementScreenState extends State<AchievementScreen> {
             child: LinearProgressIndicator(
                 value: (v / a.target).clamp(0.0, 1.0).toDouble(),
                 minHeight: 8,
-                color: a.color,
-                backgroundColor: Colors.grey.shade200),
+                color: done ? a.color : _redPrimary,
+                backgroundColor: const Color(0xFFFFF0F0)),
           ),
           const SizedBox(height: 6),
           Text(done ? 'Achievement terbuka 🎉' : '${_n(v)} / ${_n(a.target)} ${a.unit}',
@@ -235,16 +235,16 @@ class _AchievementScreenState extends State<AchievementScreen> {
               final done = v >= a.target;
               return ListTile(
                 leading: CircleAvatar(
-                    backgroundColor: (done ? a.color : Colors.grey).withOpacity(.18),
-                    child: Icon(done ? a.icon : Icons.lock_outline, color: done ? a.color : Colors.grey)),
+                    backgroundColor: (done ? a.color : _redPrimary).withOpacity(.18),
+                    child: Icon(done ? a.icon : Icons.lock_outline, color: done ? a.color : _redPrimary)),
                 title: Text(a.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(a.desc, style: const TextStyle(fontSize: 12)),
                   const SizedBox(height: 4),
                   LinearProgressIndicator(
                       value: (v / a.target).clamp(0.0, 1.0).toDouble(),
-                      color: a.color,
-                      backgroundColor: Colors.grey.shade200),
+                      color: done ? a.color : _redPrimary,
+                      backgroundColor: const Color(0xFFFFF0F0)),
                 ]),
                 trailing: done
                     ? const Icon(Icons.check_circle, color: Colors.green)
@@ -267,7 +267,6 @@ class _AchievementScreenState extends State<AchievementScreen> {
     );
   }
 
-  // Helper untuk membuat inisial nama dan warna latar belakang avatar profil
   String _getInitials(String name) {
     final parts = name.trim().split(' ');
     if (parts.length >= 2) {
@@ -418,9 +417,12 @@ class _AchievementScreenState extends State<AchievementScreen> {
           const SizedBox(height: 14),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Row(children: [
-              for (final a in _achs.take(5)) _achItem(s, a),
-            ]),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start, // Memastikan semua lencana sejajar dari atas secara rapi
+              children: [
+                for (final a in _achs.take(5)) _achItem(s, a),
+              ],
+            ),
           ),
 
           // ----------------------------------------------- leaderboard
@@ -568,23 +570,41 @@ class _AchievementScreenState extends State<AchievementScreen> {
 
   Widget _achItem(AppState s, _Ach a) {
     final done = a.value(s) >= a.target;
-    final color = done ? a.color : Colors.grey;
+    final bgColor = done ? a.color.withOpacity(.16) : _redPrimary.withOpacity(.08);
+    final iconColor = done ? a.color : _redPrimary;
+    
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () => _showAch(s, a),
       child: Container(
-        width: 96,
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(children: [
-          CircleAvatar(
+        width: 100,
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start, // Mengatur posisi elemen dari atas secara konsisten
+          children: [
+            CircleAvatar(
               radius: 32,
-              backgroundColor: color.withOpacity(.16),
-              child: Icon(done ? a.icon : Icons.lock, color: color, size: 30)),
-          const SizedBox(height: 6),
-          Text(a.name,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: done ? null : Colors.grey)),
-        ]),
+              backgroundColor: bgColor,
+              child: Icon(done ? a.icon : Icons.lock, color: iconColor, size: 30),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 36, // Menjaga ruang teks agar tetap konsisten dan sejajar antar lencana
+              child: Text(
+                a.name,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: done ? null : Colors.black87,
+                  fontWeight: FontWeight.w500,
+                  height: 1.2,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

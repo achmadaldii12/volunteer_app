@@ -772,30 +772,29 @@ class HomeScreen extends StatelessWidget {
               
               LayoutBuilder(
                 builder: (context, constraints) {
-                  double cardWidth = (constraints.maxWidth - 32) / 3;
-                  if (cardWidth < 220) cardWidth = constraints.maxWidth;
-
-                  return constraints.maxWidth > 700
-                      ? IntrinsicHeight(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: kBlogArticles
-                                .take(3)
-                                .map((article) => SizedBox(
-                                      width: cardWidth,
-                                      child: _GridArticleCard(article),
-                                    ))
-                                .toList(),
-                          ),
-                        )
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: 3,
-                          separatorBuilder: (_, __) => const SizedBox(height: 16),
-                          itemBuilder: (context, index) => _GridArticleCard(kBlogArticles[index]),
-                        );
+                  bool isMobileView = constraints.maxWidth < 700;
+                  if (isMobileView) {
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 3,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) => _GridArticleCard(kBlogArticles[index]),
+                    );
+                  } else {
+                    double cardWidth = (constraints.maxWidth - 32) / 3;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: kBlogArticles
+                          .take(3)
+                          .map((article) => SizedBox(
+                                width: cardWidth,
+                                child: _GridArticleCard(article),
+                              ))
+                          .toList(),
+                    );
+                  }
                 },
               ),
               const SizedBox(height: 24),
@@ -865,32 +864,30 @@ class _GridArticleCard extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      article.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, height: 1.3),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      article.excerpt,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: muted(context), height: 1.3),
-                    ),
-                    const Spacer(),
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Text('Baca lebih lanjut', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFFE53935))),
-                    ),
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    article.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, height: 1.3),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    article.excerpt,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: muted(context), height: 1.3),
+                  ),
+                  const SizedBox(height: 12),
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Text('Baca lebih lanjut', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFFE53935))),
+                  ),
+                ],
               ),
             ),
           ],
@@ -1012,6 +1009,7 @@ class _PopularCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Membaca state aplikasi
     final s = context.watch<AppState>();
     return AppCard(
       padding: const EdgeInsets.all(10),

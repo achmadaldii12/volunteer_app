@@ -8,16 +8,17 @@ import '../models/models.dart';
 import '../providers/app_state.dart';
 
 // ============================================================
-// WARNA HALAMAN (biru utama, merah sebagai aksen)
+// WARNA HALAMAN (biru utama, merah sebagai aksen tema)
 // ============================================================
 const _blue = Color(0xFF3B5BDB);
 const _blueLight = Color(0xFF5C7CFA);
+const _redAccent = Color(0xFFE53935); // Warna merah aksen aplikasi
 const _gold = Color(0xFFFFC83D);
 
 Color _bg(BuildContext c) => isDark(c) ? const Color(0xFF111522) : const Color(0xFFF2F5FF);
 Color _card(BuildContext c) => isDark(c) ? const Color(0xFF1B2133) : Colors.white;
 Color _line(BuildContext c) => isDark(c) ? const Color(0xFF2A3350) : const Color(0xFFE2E8FF);
-Color _blueSoft(BuildContext c) => isDark(c) ? const Color(0xFF232C4A) : const Color(0xFFEAEFFF);
+Color _redSoft(BuildContext c) => isDark(c) ? const Color(0xFF3A1F22) : const Color(0xFFFFEBEE);
 Color _textOf(BuildContext c) => Theme.of(c).colorScheme.onSurface;
 
 /// Pengganti withOpacity (yang sudah deprecated di Flutter terbaru) agar Problems bersih.
@@ -27,8 +28,6 @@ extension _ColorOp on Color {
 
 // ============================================================
 // POPUP PENGHARGAAN (poin / level naik / badge baru)
-// Dipanggil otomatis saat halaman ini dibuka, dan dari halaman lain
-// (mis. setelah kehadiran diverifikasi) lewat showPendingCelebrations().
 // ============================================================
 Future<void> showPendingCelebrations(BuildContext context) async {
   final s = context.read<AppState>();
@@ -109,7 +108,7 @@ class _CelebrationDialog extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _blue,
+                  backgroundColor: _redAccent,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 13),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -236,7 +235,7 @@ class _Section extends StatelessWidget {
         color: color ?? _card(context),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: _line(context)),
-        boxShadow: [BoxShadow(color: _blue.op(isDark(context) ? 0 : .06), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: _redAccent.op(isDark(context) ? 0 : .05), blurRadius: 12, offset: const Offset(0, 4))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
@@ -252,7 +251,7 @@ class _Section extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 child: Text(action!,
-                    style: const TextStyle(color: _blue, fontSize: 12, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(color: _redAccent, fontSize: 12, fontWeight: FontWeight.w600)),
               ),
             ),
         ]),
@@ -349,12 +348,12 @@ class _AchievementScreenState extends State<AchievementScreen> {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [_blue, _blueLight],
+          colors: [_redAccent, Color(0xFFEF5350)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: _blue.op(.35), blurRadius: 18, offset: const Offset(0, 8))],
+        boxShadow: [BoxShadow(color: _redAccent.op(.35), blurRadius: 18, offset: const Offset(0, 8))],
       ),
       child: Column(children: [
         Row(children: [
@@ -489,7 +488,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
                 value: s.achProgress(u.id, b),
                 minHeight: 8,
                 backgroundColor: _line(context),
-                valueColor: AlwaysStoppedAnimation(earned ? AppColors.success : _blue),
+                valueColor: AlwaysStoppedAnimation(earned ? AppColors.success : _redAccent),
               ),
             ),
             const SizedBox(height: 6),
@@ -561,7 +560,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
                             value: s.achProgress(u.id, b),
                             minHeight: 6,
                             backgroundColor: _line(ctx),
-                            valueColor: AlwaysStoppedAnimation(earned ? AppColors.success : _blue),
+                            valueColor: AlwaysStoppedAnimation(earned ? AppColors.success : _redAccent),
                           ),
                         ),
                       ]),
@@ -595,14 +594,14 @@ class _AchievementScreenState extends State<AchievementScreen> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               decoration: BoxDecoration(
-                color: _period == p ? _blue : _blueSoft(context),
+                color: _period == p ? _redAccent : _redSoft(context),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Text(p.label,
                   style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
-                      color: _period == p ? Colors.white : _blue)),
+                      color: _period == p ? Colors.white : _redAccent)),
             ),
           ),
         ),
@@ -616,7 +615,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
 
     return _Section(
       icon: Icons.leaderboard,
-      iconColor: _blue,
+      iconColor: _redAccent,
       title: 'Leaderboard',
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SingleChildScrollView(scrollDirection: Axis.horizontal, child: _periodPills(context)),
@@ -699,22 +698,22 @@ class _AchievementScreenState extends State<AchievementScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _blueSoft(context),
+        color: _redSoft(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _blue.op(.35)),
+        border: Border.all(color: _redAccent.op(.35)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Icon(Icons.location_on, color: AppColors.primary, size: 20),
+          const Icon(Icons.location_on, color: _redAccent, size: 20),
           const SizedBox(width: 6),
           Text('Posisi Kamu',
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: _textOf(context))),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(color: _blue.op(.15), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: _redAccent.op(.15), borderRadius: BorderRadius.circular(8)),
             child: Text(_period.label,
-                style: const TextStyle(fontSize: 10.5, color: _blue, fontWeight: FontWeight.w600)),
+                style: const TextStyle(fontSize: 10.5, color: _redAccent, fontWeight: FontWeight.w600)),
           ),
         ]),
         const SizedBox(height: 12),
@@ -744,7 +743,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             _CountUp(
                 value: me.points,
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: _blue)),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: _redAccent)),
             Text('Poin', style: TextStyle(fontSize: 11, color: muted(context))),
           ]),
         ]),
@@ -844,7 +843,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: _blueSoft(ctx), borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(color: _redSoft(ctx), borderRadius: BorderRadius.circular(14)),
               child: Text(
                 'Penilaian: poin yang diperoleh bulan ini (sudah mencakup jumlah event yang '
                 'diselesaikan dan kontribusi koordinator / apresiasi) ditambah 20 poin untuk setiap '
@@ -864,7 +863,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
                     color: i == 0 ? const Color(0xFFF5B301).op(.12) : _bg(ctx),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                        color: board.stars[i].isMe ? AppColors.primary.op(.5) : _line(ctx)),
+                        color: board.stars[i].isMe ? _redAccent.op(.5) : _line(ctx)),
                   ),
                   child: Row(children: [
                     Text('#${i + 1}',
@@ -884,7 +883,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
                     ),
                     Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                       Text('${fmtNum(board.stars[i].points)} Poin',
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: _blue)),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: _redAccent)),
                       Text('Skor ${board.stars[i].score}', style: TextStyle(fontSize: 10.5, color: muted(ctx))),
                     ]),
                   ]),
@@ -901,7 +900,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
     final latest = all.take(5).toList();
     return _Section(
       icon: Icons.history,
-      iconColor: _blue,
+      iconColor: _redAccent,
       title: 'Riwayat Perolehan Poin',
       action: 'Lihat Semua',
       onAction: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PointHistoryScreen())),
@@ -921,7 +920,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
     Widget rule(IconData icon, String pts, String text) => Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Icon(icon, size: 18, color: _blue),
+            Icon(icon, size: 18, color: _redAccent),
             const SizedBox(width: 10),
             SizedBox(
               width: 38,
@@ -934,7 +933,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
 
     return _Section(
       icon: Icons.trending_up,
-      iconColor: AppColors.primary,
+      iconColor: _redAccent,
       title: 'Level & Cara Mendapat Poin',
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Wrap(spacing: 8, runSpacing: 8, children: [
@@ -1078,7 +1077,7 @@ class _RankRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: e.isMe ? (isDark(context) ? const Color(0x33DC2626) : const Color(0xFFFFF1F1)) : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: e.isMe ? AppColors.primary.op(.45) : Colors.transparent),
+        border: Border.all(color: e.isMe ? _redAccent.op(.45) : Colors.transparent),
       ),
       child: Row(children: [
         _badge(context),
@@ -1098,7 +1097,7 @@ class _RankRow extends StatelessWidget {
                 Container(
                   margin: const EdgeInsets.only(left: 6),
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                  decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(6)),
+                  decoration: BoxDecoration(color: _redAccent, borderRadius: BorderRadius.circular(6)),
                   child: const Text('Kamu',
                       style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700)),
                 ),
@@ -1108,7 +1107,7 @@ class _RankRow extends StatelessWidget {
           ]),
         ),
         Text('${fmtNum(e.points)} Poin',
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: _blue)),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: _redAccent)),
       ]),
     );
   }
@@ -1143,7 +1142,7 @@ Color _typeColor(String t) {
     case PointType.opening:
       return const Color(0xFF64748B);
     default:
-      return _blue;
+      return _redAccent;
   }
 }
 
@@ -1228,7 +1227,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
           child: ChoiceChip(
             label: Text(label),
             selected: _filter == i,
-            selectedColor: _blue,
+            selectedColor: _redAccent,
             showCheckmark: false,
             labelStyle: TextStyle(color: _filter == i ? Colors.white : null, fontSize: 12),
             onSelected: (_) => setState(() => _filter = i),
@@ -1247,7 +1246,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [_blue, _blueLight]),
+                  gradient: const LinearGradient(colors: [_redAccent, Color(0xFFEF5350)]),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(children: [

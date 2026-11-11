@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/app_state.dart';
 
-const _indigo = Color(0xFF3F51B5);
-const _indigoLight = Color(0xFF5C6BC0);
+const _redPrimary = Color(0xFFD32F2F); // Warna merah utama
+const _redLight = Color(0xFFEF5350);  // Warna merah muda / gradasi
 
 // ============================================================ helper format
 const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -88,8 +88,6 @@ final List<_Ach> _achs = [
 ];
 
 // ================================================================ POIN/RANK
-/// Poin milik [u]. Jika [withinDays] diisi, hanya menghitung poin kegiatan
-/// yang dihadiri dalam N hari terakhir (untuk leaderboard mingguan/bulanan).
 int _userPoints(AppState s, AppUser u, {int? withinDays}) {
   var total = withinDays == null ? u.pastPoints : 0;
   final now = DateTime.now();
@@ -103,8 +101,6 @@ int _userPoints(AppState s, AppUser u, {int? withinDays}) {
   return total;
 }
 
-/// Streak = jumlah hari berturut-turut (sampai hari ini/kemarin) yang ada
-/// aktivitas: mendaftar kegiatan atau menghadiri kegiatan.
 int _streak(AppState s) {
   final u = s.user;
   if (u == null) return 0;
@@ -147,8 +143,8 @@ const _rivals = <_Rival>[
 
 class _Entry {
   final String name;
-  final int points; // poin pada periode terpilih
-  final int all; // poin sepanjang waktu (untuk label level)
+  final int points;
+  final int all;
   final bool me;
   _Entry(this.name, this.points, this.all, this.me);
 }
@@ -271,6 +267,32 @@ class _AchievementScreenState extends State<AchievementScreen> {
     );
   }
 
+  // Helper untuk membuat inisial nama dan warna latar belakang avatar profil
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0][0].toUpperCase();
+    }
+    return '?';
+  }
+
+  Color _getAvatarColor(String name) {
+    final hash = name.hashCode.abs();
+    final colors = [
+      Colors.indigo,
+      Colors.blue,
+      Colors.teal,
+      Colors.green.shade700,
+      Colors.deepOrange,
+      Colors.purple,
+      Colors.pink,
+      Colors.blueGrey,
+    ];
+    return colors[hash % colors.length];
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
@@ -289,7 +311,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7FB),
       appBar: AppBar(
-        backgroundColor: _indigo,
+        backgroundColor: _redPrimary,
         foregroundColor: Colors.white,
         centerTitle: true,
         title: const Text('Achievement & Ranking',
@@ -311,7 +333,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
               gradient: const LinearGradient(
-                  colors: [_indigoLight, _indigo], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  colors: [_redLight, _redPrimary], begin: Alignment.topLeft, end: Alignment.bottomRight),
             ),
             child: Column(children: [
               Row(children: [
@@ -319,7 +341,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
                   radius: 32,
                   backgroundColor: Colors.white,
                   child: Text(u?.initials ?? '?',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _indigo)),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _redPrimary)),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -390,7 +412,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
             GestureDetector(
               onTap: () => _showAllAch(s),
               child: const Text('Lihat Semua >',
-                  style: TextStyle(color: _indigo, fontSize: 13, fontWeight: FontWeight.w500)),
+                  style: TextStyle(color: _redPrimary, fontSize: 13, fontWeight: FontWeight.w500)),
             ),
           ]),
           const SizedBox(height: 14),
@@ -437,6 +459,84 @@ class _AchievementScreenState extends State<AchievementScreen> {
                     child: Text('• • •', style: TextStyle(color: Colors.grey))),
                 _row(myIndex + 1, entries[myIndex]),
               ],
+            ]),
+          ),
+
+          // -------------------------------------------------- POSISI KAMU
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _redLight.withOpacity(0.4)),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(.04), blurRadius: 8, offset: const Offset(0, 3))],
+            ),
+            child: Row(children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: _redPrimary,
+                child: Text(u?.initials ?? 'AS', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('#${myIndex >= 0 ? myIndex + 1 : '-'} ${u?.name ?? 'Achmad Aldi'}',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 2),
+                  Text(myIndex == 0 ? 'Kamu berada di peringkat pertama! 🌟' : 'Kamu berada di peringkat #${myIndex >= 0 ? myIndex + 1 : '-'}',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                ]),
+              ),
+              Text('${_n(points)} Poin',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: _redPrimary)),
+            ]),
+          ),
+
+          // -------------------------------------------------- VOLUNTEER OF THE MONTH
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade50,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.amber.shade200),
+            ),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Volunteer of The Month',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.amber)),
+                  GestureDetector(
+                    onTap: () => _explain('Volunteer of the Month', 'Andi Pratama terpilih sebagai relawan terbaik bulan ini atas dedikasi luar biasanya.'),
+                    child: Text('Lihat Detail >',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.amber.shade800)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(children: [
+                CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.amber.shade700,
+                    child: const Text('AP', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Andi Pratama', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    SizedBox(height: 4),
+                    Row(children: [
+                      Icon(Icons.star, size: 13, color: Colors.amber),
+                      SizedBox(width: 4),
+                      Text('8.500 Poin  |  ', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                      Icon(Icons.event, size: 13, color: Colors.grey),
+                      SizedBox(width: 4),
+                      Text('15 Event', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                    ]),
+                  ]),
+                ),
+              ]),
             ]),
           ),
 
@@ -496,7 +596,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(color: sel ? _indigo : Colors.transparent, borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(color: sel ? _redPrimary : Colors.transparent, borderRadius: BorderRadius.circular(18)),
         child: Text(_periods[i],
             style: TextStyle(
                 fontSize: 12,
@@ -514,8 +614,12 @@ class _AchievementScreenState extends State<AchievementScreen> {
             : rank == 3
                 ? const Color(0xFFB45309)
                 : Colors.black45;
+    
+    final avatarBg = e.me ? _redPrimary : _getAvatarColor(e.name);
+    final initials = _getInitials(e.name);
+
     return Container(
-      color: e.me ? _indigo.withOpacity(.08) : null,
+      color: e.me ? _redPrimary.withOpacity(.08) : null,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(children: [
         SizedBox(
@@ -526,8 +630,8 @@ class _AchievementScreenState extends State<AchievementScreen> {
         const SizedBox(width: 8),
         CircleAvatar(
             radius: 22,
-            backgroundColor: e.me ? _indigo : Colors.grey.shade400,
-            child: Icon(Icons.person, color: Colors.white, size: 24)),
+            backgroundColor: avatarBg,
+            child: Text(initials, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -539,7 +643,7 @@ class _AchievementScreenState extends State<AchievementScreen> {
           ]),
         ),
         Text('${_n(e.points)} Poin',
-            style: const TextStyle(color: _indigo, fontWeight: FontWeight.bold)),
+            style: const TextStyle(color: _redPrimary, fontWeight: FontWeight.bold)),
       ]),
     );
   }

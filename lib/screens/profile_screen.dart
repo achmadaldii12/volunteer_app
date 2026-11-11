@@ -4,6 +4,7 @@ import '../core/utils.dart';
 import '../models/gamification.dart';
 import '../providers/app_state.dart';
 import 'achievement_screen.dart';
+import 'certificate_screen.dart'; // Diimpor agar tombol Sertifikat & Feedback berfungsi penuh
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -91,6 +92,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         radius: 24,
         backgroundColor: Colors.indigo.shade50,
         child: Text(emoji, style: const TextStyle(fontSize: 24)),
+      ),
+    );
+  }
+
+  void _showInfoDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
       ),
     );
   }
@@ -190,17 +207,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 leading: const Icon(Icons.favorite_border, color: Colors.red),
                 title: const Text('Dampak Sosial'),
-                onTap: () {},
+                onTap: () {
+                  _showInfoDialog(
+                    'Dampak Sosial',
+                    'Total kontribusi dan dampak nyata yang telah kamu berikan kepada masyarakat melalui kegiatan relawan.',
+                  );
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.history, color: Colors.indigo),
                 title: const Text('Riwayat Kegiatan'),
-                onTap: () {},
+                onTap: () {
+                  _showInfoDialog(
+                    'Riwayat Kegiatan',
+                    'Daftar lengkap seluruh kegiatan sosial dan relawan yang pernah kamu ikuti dan hadiri.',
+                  );
+                },
               ),
+              
+              // === TOMBOL SERTIFIKAT & FEEDBACK YANG DIHUBUNGKAN SEPENUHNYA ===
               ListTile(
                 leading: const Icon(Icons.workspace_premium_outlined, color: Colors.green),
                 title: const Text('Sertifikat & Feedback'),
-                onTap: () {},
+                trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CertificateScreen()),
+                  );
+                },
               ),
 
               SwitchListTile(
@@ -217,13 +252,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 leading: const Icon(Icons.help_outline, color: Colors.blue),
                 title: const Text('Bantuan & FAQ'),
-                onTap: () {},
+                onTap: () {
+                  _showInfoDialog(
+                    'Bantuan & FAQ',
+                    'Butuh bantuan seputar aplikasi relawan? Hubungi tim support kami melalui email di support@volunteer.local',
+                  );
+                },
               ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.red),
                 title: const Text('Keluar', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                onTap: () {},
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Konfirmasi Keluar'),
+                      content: const Text('Apakah Anda yakin ingin keluar dari akun ini?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Batal'),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Berhasil keluar dari akun.')),
+                            );
+                          },
+                          child: const Text('Keluar', style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),

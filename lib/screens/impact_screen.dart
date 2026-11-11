@@ -4,6 +4,7 @@ import '../core/theme.dart';
 import '../core/utils.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
+import '../models/gamification.dart.dart';
 
 class ImpactScreen extends StatelessWidget {
   const ImpactScreen({super.key});
@@ -91,7 +92,7 @@ class HistoryScreen extends StatelessWidget {
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 4),
                           Text(
-                              '${fmtDate(s.eventById(r.eventId)!.date)} - ${s.eventById(r.eventId)!.hours} jam - +${s.eventById(r.eventId)!.points} poin',
+                               '${fmtDate(s.eventById(r.eventId)!.date)} - ${s.eventById(r.eventId)!.hours} jam - +$kPointsPerEvent poin',
                               style: TextStyle(fontSize: 11, color: muted(context))),
                         ]),
                       ),

@@ -1,5 +1,5 @@
 import '../models/models.dart';
-import '../models/gamification.dart.dart';
+import '../models/gamification.dart';
 import 'seed_data.dart';
 
 /// Prefix id untuk relawan awal. Relawan ini disimpan di penyimpanan lokal

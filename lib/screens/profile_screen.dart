@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/utils.dart';
-import '../models/gamification.dart.dart';
+import '../models/gamification.dart';
 import '../providers/app_state.dart';
 import 'achievement_screen.dart';
 

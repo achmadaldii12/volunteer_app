@@ -4,7 +4,7 @@ import '../core/theme.dart';
 import '../core/utils.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
-import '../models/gamification.dart.dart';
+import '../models/gamification.dart';
 
 class ImpactScreen extends StatelessWidget {
   const ImpactScreen({super.key});

@@ -24,23 +24,26 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const SearchScreen(),
-    const MyActivitiesScreen(), // Indeks 2: Riwayat / Aktivitas Saya
-    const CommunityScreen(),
-    const ProfileScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final isDarkMode = isDark(context);
     final navBackgroundColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
 
+    // Daftar layar dibuat di dalam build agar callback onNavigateToEvent dapat merubah state index dengan benar
+    final List<Widget> screens = [
+      const HomeScreen(),
+      const SearchScreen(),
+      MyActivitiesScreen(
+        onNavigateToEvent: () => setState(() => _currentIndex = 1),
+      ), // Indeks 2: Aktivitas Saya -> Berpindah ke Tab Event (indeks 1)
+      const CommunityScreen(),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

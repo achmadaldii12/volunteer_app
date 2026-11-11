@@ -96,7 +96,9 @@ class _SearchScreenState extends State<SearchScreen> {
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(16),
                                       onTap: () {
-                                        setState(() => sort = o.$1);
+                                        setState(() {
+                                          sort = o.$1;
+                                        });
                                         Navigator.pop(context);
                                       },
                                       child: Padding(
@@ -157,74 +159,99 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         );
 
-    return ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 24), children: [
-      const Text('Cari Event', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-      const SizedBox(height: 14),
-      TextField(
-        controller: _ctrl,
-        onChanged: (v) => setState(() => q = v),
-        decoration: InputDecoration(
-          hintText: 'Cari kegiatan...',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: q.isEmpty
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    _ctrl.clear();
-                    setState(() => q = '');
-                  }),
-          filled: true,
-          fillColor: softOf(context),
-          contentPadding: EdgeInsets.zero,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-        ),
-      ),
-      const SizedBox(height: 12),
-      Row(children: [
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(children: [
-              chip('Semua', cat == 'Semua' && !onlySaved, () {
-                setState(() => onlySaved = false);
-                s.setSearchCategory('Semua');
-              }),
-              for (final c in kCategories)
-                chip(c.name, cat == c.name, () => s.setSearchCategory(c.name)),
-              chip('Tersimpan', onlySaved, () => setState(() => onlySaved = !onlySaved)),
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              const Text('Cari Event', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _ctrl,
+                onChanged: (v) => setState(() => q = v),
+                decoration: InputDecoration(
+                  hintText: 'Cari kegiatan...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: q.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            _ctrl.clear();
+                            setState(() => q = '');
+                          }),
+                  filled: true,
+                  fillColor: softOf(context),
+                  contentPadding: EdgeInsets.zero,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(children: [
+                      chip('Semua', cat == 'Semua' && !onlySaved, () {
+                        setState(() => onlySaved = false);
+                        s.setSearchCategory('Semua');
+                      }),
+                      for (final c in kCategories)
+                        chip(c.name, cat == c.name && !onlySaved, () {
+                          setState(() => onlySaved = false);
+                          s.setSearchCategory(c.name);
+                        }),
+                      chip('Tersimpan', onlySaved, () {
+                        setState(() => onlySaved = !onlySaved);
+                        if (onlySaved) {
+                          s.setSearchCategory('Semua');
+                        }
+                      }),
+                    ]),
+                  ),
+                ),
+                IconButton(icon: Icon(Icons.tune, color: primary), onPressed: _openSort),
+              ]),
+              const SizedBox(height: 8),
+              Text('${list.length} kegiatan ditemukan', style: TextStyle(color: muted(context), fontSize: 12)),
+              const SizedBox(height: 14),
             ]),
           ),
         ),
-        IconButton(icon: Icon(Icons.tune, color: primary), onPressed: _openSort),
-      ]),
-      const SizedBox(height: 8),
-      Text('${list.length} kegiatan ditemukan', style: TextStyle(color: muted(context), fontSize: 12)),
-      const SizedBox(height: 14),
-
-      if (list.isEmpty)
-        const SizedBox(
-            height: 300,
-            child: EmptyState(Icons.search_off, 'Kegiatan tidak ditemukan', 'Coba kata kunci atau kategori lain.'))
-      else
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: list.length,
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 260,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            mainAxisExtent: 285,
+        if (list.isEmpty)
+          const SliverFillRemaining(
+            child: Center(
+              child: SizedBox(
+                height: 300,
+                child: EmptyState(Icons.search_off, 'Kegiatan tidak ditemukan', 'Coba kata kunci atau kategori lain.'),
+              ),
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 260,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                mainAxisExtent: 285,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  return RepaintBoundary(
+                    child: _SearchEventGridCard(list[index]),
+                  );
+                },
+                childCount: list.length,
+              ),
+            ),
           ),
-          itemBuilder: (context, index) {
-            // Menggunakan RepaintBoundary agar render filter kategori menjadi sangat cepat dan instan tanpa jeda
-            return RepaintBoundary(
-              child: _SearchEventGridCard(list[index]),
-            );
-          },
-        ),
-    ]);
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+      ],
+    );
   }
 }
 

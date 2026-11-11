@@ -11,7 +11,9 @@ import 'registration_success_screen.dart';
 import 'achievement_screen.dart';
 
 class MyActivitiesScreen extends StatelessWidget {
-  const MyActivitiesScreen({super.key});
+  const MyActivitiesScreen({super.key, this.onNavigateToEvent});
+
+  final VoidCallback? onNavigateToEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +29,8 @@ class MyActivitiesScreen extends StatelessWidget {
         const TabBar(tabs: [Tab(text: 'Mengikuti'), Tab(text: 'Selesai')]),
         Expanded(
           child: TabBarView(children: [
-            _RegList(all, 'Belum ada kegiatan', 'Daftar kegiatan pertamamu dan mulai berkontribusi.'),
-            _RegList(done, 'Belum ada kegiatan selesai', 'Kegiatan yang sudah kamu hadiri akan muncul di sini.'),
+            _RegList(all, 'Belum ada kegiatan', 'Daftar kegiatan pertamamu dan mulai berkontribusi.', onNavigateToEvent),
+            _RegList(done, 'Belum ada kegiatan selesai', 'Kegiatan yang sudah kamu hadiri akan muncul di sini.', onNavigateToEvent),
           ]),
         ),
       ]),
@@ -39,14 +41,26 @@ class MyActivitiesScreen extends StatelessWidget {
 class _RegList extends StatelessWidget {
   final List<Registration> items;
   final String emptyTitle, emptySub;
-  const _RegList(this.items, this.emptyTitle, this.emptySub);
+  final VoidCallback? onNavigateToEvent;
+
+  const _RegList(this.items, this.emptyTitle, this.emptySub, this.onNavigateToEvent);
 
   @override
   Widget build(BuildContext context) {
     final s = context.read<AppState>();
     if (items.isEmpty) {
-      return EmptyState(Icons.event_busy, emptyTitle, emptySub,
-          actionText: 'Cari Kegiatan', onAction: () => s.openSearch('Semua'));
+      return EmptyState(
+        Icons.event_busy,
+        emptyTitle,
+        emptySub,
+        actionText: 'Cari Kegiatan',
+        onAction: () {
+          s.openSearch('Semua');
+          if (onNavigateToEvent != null) {
+            onNavigateToEvent!();
+          }
+        },
+      );
     }
     return ListView(padding: const EdgeInsets.all(16), children: [
       for (final r in items) _RegTile(r),

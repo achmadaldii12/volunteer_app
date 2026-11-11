@@ -97,6 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
     return Theme(
       data: _isDarkMode ? ThemeData.dark() : ThemeData.light(),
       child: Scaffold(
@@ -161,23 +162,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 leading: const Icon(Icons.stars_outlined, color: Colors.amber),
                 title: const Text('Poin Saya'),
-                trailing: const Text('10,450 Poin', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo)),
+                trailing: Text(
+                  '${fmtNum(appState.totalPoints)} Poin',
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+                ),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AchievementScreen()),
+                    MaterialPageRoute(builder: (context) => const AchievementScreen()),
                   );
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.emoji_events_outlined, color: Colors.amber),
                 title: const Text('Achievement & Ranking'),
-                subtitle: const Text('Badge: Expert 👑'),
+                subtitle: Text(
+                  'Level: ${levelOf(appState.totalPoints).name} • Peringkat #${appState.rank}',
+                ),
                 trailing: const Text('Lihat', style: TextStyle(color: Colors.grey)),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AchievementScreen()),
+                    MaterialPageRoute(builder: (context) => const AchievementScreen()),
                   );
                 },
               ),
@@ -196,7 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: const Text('Sertifikat & Feedback'),
                 onTap: () {},
               ),
-              
+
               SwitchListTile(
                 secondary: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode, color: Colors.indigo),
                 title: const Text('Mode Gelap (Dark Mode)'),

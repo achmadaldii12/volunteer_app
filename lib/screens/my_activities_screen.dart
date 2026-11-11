@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 import '../core/theme.dart';
 import '../core/utils.dart';
 import '../models/models.dart';
+import '../models/gamification.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'event_detail_screen.dart';
 import 'registration_success_screen.dart';
+import 'achievement_screen.dart';
 
 class MyActivitiesScreen extends StatelessWidget {
   const MyActivitiesScreen({super.key});
@@ -87,13 +89,15 @@ class _RegTile extends StatelessWidget {
           if (r.status == RegStatus.registered) ...[
             ListTile(
               leading: const Icon(Icons.how_to_reg_outlined),
-              title: const Text('Simulasikan Hadir (demo)'),
-              subtitle: const Text('Mencatat kehadiran, menambah poin & badge'),
-              onTap: () {
+              title: const Text('Verifikasi Kehadiran (demo panitia)'),
+              subtitle: Text('Poin +$kPointsPerEvent diberikan setelah kehadiran diverifikasi'),
+              onTap: () async {
                 Navigator.pop(sheet);
-                s.markAttended(r.id);
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('Kehadiran tercatat, +${e.points} poin')));
+                final gained = s.markAttended(r.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(gained > 0 ? 'Kehadiran terverifikasi, +$gained poin' : 'Poin sudah pernah diberikan')));
+                if (!context.mounted) return;
+                await showPendingCelebrations(context);
               },
             ),
             ListTile(
@@ -113,6 +117,32 @@ class _RegTile extends StatelessWidget {
                   ),
                 );
                 if (ok == true) s.cancelReg(r.id);
+              },
+            ),
+          ],
+          if (r.status == RegStatus.attended) ...[
+            ListTile(
+              leading: const Icon(Icons.groups_outlined),
+              title: const Text('Jadikan Koordinator (demo panitia)'),
+              subtitle: Text('+$kPointsCoordinator poin tambahan'),
+              onTap: () async {
+                Navigator.pop(sheet);
+                final err = s.awardCoordinator(r.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(err ?? 'Poin koordinator +$kPointsCoordinator diberikan')));
+                if (err == null && context.mounted) await showPendingCelebrations(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.thumb_up_alt_outlined),
+              title: const Text('Beri Apresiasi (demo panitia)'),
+              subtitle: Text('+$kPointsAppreciation poin tambahan'),
+              onTap: () async {
+                Navigator.pop(sheet);
+                final err = s.awardAppreciation(r.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(err ?? 'Poin apresiasi +$kPointsAppreciation diberikan')));
+                if (err == null && context.mounted) await showPendingCelebrations(context);
               },
             ),
           ],

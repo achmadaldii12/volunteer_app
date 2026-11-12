@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/seed_data.dart';
 import '../data/leaderboard_seed.dart';
+import '../data/community_seed.dart';
+import '../models/community.dart';
 import '../models/models.dart';
 import '../models/gamification.dart';
 
@@ -18,6 +20,14 @@ class AppState extends ChangeNotifier {
   List<FeedbackItem> feedbacks = [];
   List<PointEntry> pointEntries = []; // riwayat poin semua pengguna (disimpan permanen)
   final List<Celebration> _celebrations = []; // antrean popup poin / badge / level
+  // ---- Komunitas (disimpan permanen) ----
+  List<CommMessage> commMessages = [];
+  List<Announcement> announcements = [];
+  List<CommPoll> polls = [];
+  List<CommReport> commReports = [];
+  Set<String> commBlocked = {}; // format "idSaya:idDiblokir"
+  Map<String, int> commLastRead = {}; // format "idSaya:idRuang" -> waktu terakhir dibaca
+  Set<String> commAdmins = {};
   Set<String> bookmarks = {};
   String? sessionUserId;
   ThemeMode themeMode = ThemeMode.light;
@@ -44,6 +54,11 @@ class AppState extends ChangeNotifier {
         _initPointLedger();
         await _save();
       }
+      // Migrasi: aplikasi versi lama belum punya data komunitas
+      if (p.getString('comm_messages') == null) {
+        _seedCommunity();
+        await _save();
+      }
     }
     ready = true;
     notifyListeners();
@@ -59,7 +74,42 @@ class AppState extends ChangeNotifier {
     pointEntries = [];
     _celebrations.clear();
     _initPointLedger();
+    _seedCommunity();
   }
+
+  /// Isi awal Komunitas (pesan, pengumuman, polling) + notifikasi awal untuk akun yang ada.
+  void _seedCommunity() {
+    final pack = buildCommunitySeed(events);
+    commMessages = pack.messages;
+    announcements = pack.announcements;
+    polls = pack.polls;
+    commReports = [];
+    commBlocked = {};
+    commLastRead = {};
+    commAdmins = {kDefaultAdminId};
+    for (final u in users) {
+      if (u.id.startsWith(kSeedUserPrefix)) continue;
+      if (notifs.any((n) => n.userId == u.id && n.kind.startsWith('comm_'))) continue;
+      final now = DateTime.now();
+      notifs.insert(0, Notif(
+          id: _id('n'), userId: u.id, title: 'Pengumuman penting', body: pack.announcements.first.title,
+          kind: 'comm_announce:${pack.announcements.first.id}', createdAt: now.subtract(const Duration(hours: 20))));
+      notifs.insert(0, Notif(
+          id: _id('n'), userId: u.id, title: 'Undangan event dari Budi Santoso',
+          body: 'Ayo ajak relawan ke event pilihan! Cek ruang Umum.',
+          kind: 'comm_invite:umum', createdAt: now.subtract(const Duration(minutes: 80))));
+      notifs.insert(0, Notif(
+          id: _id('n'), userId: u.id, title: 'Pesan baru di Umum',
+          body: 'Siti Rahmawati: Halo relawan! Ada yang mau ikut aksi tanam mangrove minggu ini?',
+          kind: 'comm_msg:umum', createdAt: now.subtract(const Duration(minutes: 40))));
+    }
+  }
+
+  /// Dipakai oleh logika komunitas (community_logic.dart).
+  String newId(String prefix) => _id(prefix);
+
+  /// Menyimpan perubahan data komunitas dan memperbarui tampilan.
+  void commitCommunity() => _commit();
 
   List<T> _list<T>(String? s, T Function(Map<String, dynamic>) f) {
     if (s == null) return [];
@@ -74,6 +124,19 @@ class AppState extends ChangeNotifier {
     notifs = _list(p.getString('notifs'), Notif.fromJson);
     feedbacks = _list(p.getString('feedbacks'), FeedbackItem.fromJson);
     pointEntries = _list(p.getString('points'), PointEntry.fromJson);
+    commMessages = _list(p.getString('comm_messages'), CommMessage.fromJson);
+    announcements = _list(p.getString('comm_announcements'), Announcement.fromJson);
+    polls = _list(p.getString('comm_polls'), CommPoll.fromJson);
+    commReports = _list(p.getString('comm_reports'), CommReport.fromJson);
+    commBlocked = (p.getStringList('comm_blocked') ?? []).toSet();
+    commAdmins = (p.getStringList('comm_admins') ?? [kDefaultAdminId]).toSet();
+    commLastRead = {};
+    final lr = p.getString('comm_lastread');
+    if (lr != null) {
+      (jsonDecode(lr) as Map).forEach((k, v) {
+        commLastRead[k.toString()] = (v as num).toInt();
+      });
+    }
     bookmarks = (p.getStringList('bookmarks') ?? []).toSet();
     sessionUserId = p.getString('session');
     final t = p.getString('theme');
@@ -88,6 +151,13 @@ class AppState extends ChangeNotifier {
     await p.setString('notifs', jsonEncode(notifs.map((e) => e.toJson()).toList()));
     await p.setString('feedbacks', jsonEncode(feedbacks.map((e) => e.toJson()).toList()));
     await p.setString('points', jsonEncode(pointEntries.map((e) => e.toJson()).toList()));
+    await p.setString('comm_messages', jsonEncode(commMessages.map((e) => e.toJson()).toList()));
+    await p.setString('comm_announcements', jsonEncode(announcements.map((e) => e.toJson()).toList()));
+    await p.setString('comm_polls', jsonEncode(polls.map((e) => e.toJson()).toList()));
+    await p.setString('comm_reports', jsonEncode(commReports.map((e) => e.toJson()).toList()));
+    await p.setStringList('comm_blocked', commBlocked.toList());
+    await p.setStringList('comm_admins', commAdmins.toList());
+    await p.setString('comm_lastread', jsonEncode(commLastRead));
     await p.setStringList('bookmarks', bookmarks.toList());
     await p.setString('theme', themeMode.name);
     if (sessionUserId == null) {

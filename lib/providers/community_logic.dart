@@ -4,8 +4,7 @@ import '../models/models.dart';
 import 'app_state.dart';
 
 String _short(String s) {
-  final t = s.trim().replaceAll('
-', ' ');
+  final t = s.trim().replaceAll('\n', ' ');
   return t.length <= 70 ? t : '${t.substring(0, 70)}...';
 }
 

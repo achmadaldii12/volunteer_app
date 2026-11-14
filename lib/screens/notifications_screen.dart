@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../core/theme.dart';
 import '../core/utils.dart';
 import '../providers/app_state.dart';
+import '../providers/profile_store.dart';
 import '../widgets/common.dart';
 
 class NotificationsScreen extends StatelessWidget {
@@ -26,7 +27,10 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
-    final items = s.myNotifs;
+    final st = context.watch<ProfileStore>();
+    final uid = s.user?.id;
+    // Notifikasi yang dimatikan di Pengaturan Notifikasi tidak ditampilkan
+    final items = s.myNotifs.where((n) => uid == null || st.allows(uid, n.kind)).toList();
     return Column(children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),

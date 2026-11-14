@@ -16,6 +16,7 @@ dependencies:
   qr_flutter: ^4.1.0
   pdf: ^3.10.4
   printing: ^5.11.1
+  image_picker: ^1.2.4
 
 dev_dependencies:
   flutter_test:

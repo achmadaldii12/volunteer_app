@@ -48,21 +48,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        title: Text(tx(context, 'Profil Saya', 'My Profile')),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: tx(context, 'Pengaturan', 'Settings'),
-            onPressed: () => _open(const SettingsScreen()),
+      // AppBar dibungkus/diberi shape melengkung di sudut bawahnya
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(20), // Membuat sudut bawah melengkung tumpul
           ),
-        ],
+          child: AppBar(
+            backgroundColor: const Color(0xFFDC2626), // Warna merah
+            foregroundColor: Colors.white, // Ikon dan teks default putih
+            elevation: 2,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              tooltip: tx(context, 'Kembali', 'Back'),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              tx(context, 'Profil Saya', 'My Profile'),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings_outlined, color: Colors.white),
+                tooltip: tx(context, 'Pengaturan', 'Settings'),
+                onPressed: () => _open(const SettingsScreen()),
+              ),
+            ],
+          ),
+        ),
       ),
       body: Stack(children: [
-        // Latar belakang gambar (tetap di belakang saat halaman di-scroll)
+        // Latar belakang gambar tetap di belakang
         Positioned.fill(child: _pageBackground(context)),
         Positioned.fill(
           child: u == null
@@ -71,7 +88,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   final wide = c.maxWidth >= 860;
                   Widget two(Widget a, Widget b) {
                     if (!wide) {
-                      return Column(children: [a, const SizedBox(height: 14), b]);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [a, const SizedBox(height: 14), b],
+                      );
                     }
                     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Expanded(child: a),
@@ -81,32 +101,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }
 
                   return ListView(
-                    padding: EdgeInsets.fromLTRB(
-                      wide ? 24 : 14,
-                      MediaQuery.of(context).padding.top + kToolbarHeight + 8,
-                      wide ? 24 : 14,
-                      24,
-                    ),
+                    // Padding atas disesuaikan agar pas di bawah AppBar yang melengkung
+                    padding: EdgeInsets.fromLTRB(wide ? 24 : 16, 14, wide ? 24 : 16, 28),
                     children: [
-                      Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1100),
-                          child: Column(children: [
-                            _header(context, s, st, wide),
-                            const SizedBox(height: 14),
-                            two(_achievementsCard(context, s), _levelCard(context, s)),
-                            const SizedBox(height: 14),
-                            two(_statsCard(context, s), _vomCard(context, s)),
-                            const SizedBox(height: 14),
-                            two(_activityMenu(context, s), _settingsMenu(context, s, st)),
-                            const SizedBox(height: 14),
-                            two(_recapCard(context, s), _goalsCard(context, s, st)),
-                            const SizedBox(height: 14),
-                            two(_helpCard(context), _journeyCard(context, s, st)),
-                            const SizedBox(height: 14),
-                            _footer(context, s, st),
-                          ]),
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _header(context, s, st, wide),
+                          const SizedBox(height: 14),
+                          two(_achievementsCard(context, s), _levelCard(context, s)),
+                          const SizedBox(height: 14),
+                          two(_statsCard(context, s), _vomCard(context, s)),
+                          const SizedBox(height: 14),
+                          two(_activityMenu(context, s), _settingsMenu(context, s, st)),
+                          const SizedBox(height: 14),
+                          two(_recapCard(context, s), _goalsCard(context, s, st)),
+                          const SizedBox(height: 14),
+                          two(_helpCard(context), _journeyCard(context, s, st)),
+                          const SizedBox(height: 14),
+                          _footer(context, s, st),
+                        ],
                       ),
                     ],
                   );
@@ -192,6 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : u.bio;
 
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFDC2626), Color(0xFFB91C1C), Color(0xFF7F1D1D)],
@@ -204,7 +219,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: Stack(children: [
-          // Ilustrasi pemandangan di dalam header (transparan di atas warna merah)
           Positioned.fill(
             child: Image.asset(
               'assets/image/profile_bg.png',
@@ -509,9 +523,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Row(children: [
           const Icon(Icons.workspace_premium, color: Color(0xFFF59E0B)),
           const SizedBox(width: 8),
-          Expanded(
+          const Expanded(
             child: Text('Volunteer of The Month',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

@@ -48,7 +48,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         title: Text(tx(context, 'Profil Saya', 'My Profile')),
         actions: [
           IconButton(
@@ -58,48 +61,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      body: u == null
-          ? Center(child: Text(tx(context, 'Silakan login terlebih dahulu', 'Please log in first')))
-          : LayoutBuilder(builder: (context, c) {
-              final wide = c.maxWidth >= 860;
-              Widget two(Widget a, Widget b) {
-                if (!wide) {
-                  return Column(children: [a, const SizedBox(height: 14), b]);
-                }
-                return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Expanded(child: a),
-                  const SizedBox(width: 14),
-                  Expanded(child: b),
-                ]);
-              }
+      body: Stack(children: [
+        // Latar belakang gambar (tetap di belakang saat halaman di-scroll)
+        Positioned.fill(child: _pageBackground(context)),
+        Positioned.fill(
+          child: u == null
+              ? Center(child: Text(tx(context, 'Silakan login terlebih dahulu', 'Please log in first')))
+              : LayoutBuilder(builder: (context, c) {
+                  final wide = c.maxWidth >= 860;
+                  Widget two(Widget a, Widget b) {
+                    if (!wide) {
+                      return Column(children: [a, const SizedBox(height: 14), b]);
+                    }
+                    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Expanded(child: a),
+                      const SizedBox(width: 14),
+                      Expanded(child: b),
+                    ]);
+                  }
 
-              return ListView(
-                padding: EdgeInsets.fromLTRB(wide ? 24 : 14, 8, wide ? 24 : 14, 24),
-                children: [
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1100),
-                      child: Column(children: [
-                        _header(context, s, st, wide),
-                        const SizedBox(height: 14),
-                        two(_achievementsCard(context, s), _levelCard(context, s)),
-                        const SizedBox(height: 14),
-                        two(_statsCard(context, s), _vomCard(context, s)),
-                        const SizedBox(height: 14),
-                        two(_activityMenu(context, s), _settingsMenu(context, s, st)),
-                        const SizedBox(height: 14),
-                        two(_recapCard(context, s), _goalsCard(context, s, st)),
-                        const SizedBox(height: 14),
-                        two(_helpCard(context), _journeyCard(context, s, st)),
-                        const SizedBox(height: 14),
-                        _footer(context, s, st),
-                      ]),
+                  return ListView(
+                    padding: EdgeInsets.fromLTRB(
+                      wide ? 24 : 14,
+                      MediaQuery.of(context).padding.top + kToolbarHeight + 8,
+                      wide ? 24 : 14,
+                      24,
                     ),
-                  ),
-                ],
-              );
-            }),
+                    children: [
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1100),
+                          child: Column(children: [
+                            _header(context, s, st, wide),
+                            const SizedBox(height: 14),
+                            two(_achievementsCard(context, s), _levelCard(context, s)),
+                            const SizedBox(height: 14),
+                            two(_statsCard(context, s), _vomCard(context, s)),
+                            const SizedBox(height: 14),
+                            two(_activityMenu(context, s), _settingsMenu(context, s, st)),
+                            const SizedBox(height: 14),
+                            two(_recapCard(context, s), _goalsCard(context, s, st)),
+                            const SizedBox(height: 14),
+                            two(_helpCard(context), _journeyCard(context, s, st)),
+                            const SizedBox(height: 14),
+                            _footer(context, s, st),
+                          ]),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+        ),
+      ]),
     );
+  }
+
+  // ------------------------------------------------------ latar belakang
+  Widget _pageBackground(BuildContext context) {
+    final dark = isDark(context);
+    return Stack(fit: StackFit.expand, children: [
+      Image.asset(
+        'assets/image/profile_bg.png',
+        fit: BoxFit.cover,
+        alignment: Alignment.topCenter,
+        errorBuilder: (_, __, ___) => Container(color: dark ? const Color(0xFF181212) : const Color(0xFFFFF1F2)),
+      ),
+      DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: dark
+                ? [
+                    const Color(0xFF181212).withAlpha(120),
+                    const Color(0xFF181212).withAlpha(190),
+                    const Color(0xFF181212).withAlpha(235),
+                  ]
+                : [
+                    Colors.white.withAlpha(20),
+                    const Color(0xFFFFF1F2).withAlpha(120),
+                    const Color(0xFFFFF1F2).withAlpha(225),
+                  ],
+            stops: const [0.0, 0.45, 1.0],
+          ),
+        ),
+      ),
+    ]);
   }
 
   // ----------------------------------------------------------- header
@@ -157,6 +204,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: Stack(children: [
+          // Ilustrasi pemandangan di dalam header (transparan di atas warna merah)
+          Positioned.fill(
+            child: Image.asset(
+              'assets/image/profile_bg.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.bottomCenter,
+              opacity: const AlwaysStoppedAnimation(0.22),
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
           Positioned(
             right: -40,
             top: -40,

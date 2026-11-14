@@ -59,22 +59,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: const Color(0xFFDC2626), // Warna merah
             foregroundColor: Colors.white, // Ikon dan teks default putih
             elevation: 2,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              tooltip: tx(context, 'Kembali', 'Back'),
-              onPressed: () => Navigator.pop(context),
-            ),
+            automaticallyImplyLeading: false, // Menghilangkan tombol kembali otomatis
             title: Text(
               tx(context, 'Profil Saya', 'My Profile'),
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings_outlined, color: Colors.white),
-                tooltip: tx(context, 'Pengaturan', 'Settings'),
-                onPressed: () => _open(const SettingsScreen()),
-              ),
-            ],
+            actions: const [], // Menghilangkan ikon pengaturan di pojok kanan
           ),
         ),
       ),

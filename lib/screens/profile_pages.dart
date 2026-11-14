@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -202,7 +203,7 @@ class PAvatar extends StatelessWidget {
 }
 
 // ============================================================
-// FOTO PROFIL
+// FOTO PROFIL & GENERATOR AVATAR INSTAN
 // ============================================================
 class PhotoResult {
   final Uint8List? bytes;
@@ -212,39 +213,195 @@ class PhotoResult {
   factory PhotoResult.removed() => const PhotoResult._(null, true);
 }
 
-/// Menampilkan pilihan galeri / kamera / hapus foto lalu mengembalikan hasilnya.
+Future<Uint8List> _buildAvatarBytes({required bool isFemale, required int variant}) async {
+  const size = 320.0;
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, size, size));
+
+  final List<Color> bgColors = isFemale
+      ? [
+          [const Color(0xFFF472B6), const Color(0xFFDB2777)],
+          [const Color(0xFF34D399), const Color(0xFF059669)],
+          [const Color(0xFFFBBF24), const Color(0xFFD97706)],
+          [const Color(0xFFA78BFA), const Color(0xFF7C3AED)],
+          [const Color(0xFFFB7185), const Color(0xFFE11D48)],
+        ][variant]
+      : [
+          [const Color(0xFF60A5FA), const Color(0xFF2563EB)],
+          [const Color(0xFF2DD4BF), const Color(0xFF0D9488)],
+          [const Color(0xFFFB923C), const Color(0xFFEA580C)],
+          [const Color(0xFF818CF8), const Color(0xFF4F46E5)],
+          [const Color(0xFF4ADE80), const Color(0xFF16A34A)],
+        ][variant];
+
+  final bgPaint = Paint()
+    ..shader = ui.Gradient.linear(const Offset(0, 0), const Offset(size, size), bgColors);
+  canvas.drawCircle(const Offset(size / 2, size / 2), size / 2, bgPaint);
+
+  final skinPaint = Paint()..color = const Color(0xFFFDE6D8);
+  final hairPaint = Paint()..color = isFemale ? const Color(0xFF3B1F2B) : const Color(0xFF1E293B);
+  final clothPaint = Paint()..color = Colors.white.withAlpha(220);
+
+  if (isFemale) {
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(const Rect.fromLTWH(88, 76, 144, 155), const Radius.circular(72)),
+      hairPaint,
+    );
+  }
+
+  canvas.drawOval(const Rect.fromLTWH(72, 215, 176, 130), clothPaint);
+  canvas.drawRect(const Rect.fromLTWH(142, 182, 36, 44), skinPaint);
+  canvas.drawCircle(const Offset(160, 142), 52, skinPaint);
+
+  if (isFemale) {
+    final bangPath = Path()
+      ..moveTo(108, 138)
+      ..quadraticBezierTo(112, 82, 160, 82)
+      ..quadraticBezierTo(208, 82, 212, 138)
+      ..quadraticBezierTo(185, 108, 160, 118)
+      ..quadraticBezierTo(135, 108, 108, 138)
+      ..close();
+    canvas.drawPath(bangPath, hairPaint);
+  } else {
+    final maleHairPath = Path()
+      ..moveTo(108, 132)
+      ..quadraticBezierTo(106, 78, 160, 78)
+      ..quadraticBezierTo(214, 78, 212, 132)
+      ..quadraticBezierTo(195, 105, 160, 106)
+      ..quadraticBezierTo(125, 105, 108, 132)
+      ..close();
+    canvas.drawPath(maleHairPath, hairPaint);
+  }
+
+  final eyePaint = Paint()..color = const Color(0xFF1E293B);
+  canvas.drawCircle(const Offset(141, 142), 5.5, eyePaint);
+  canvas.drawCircle(const Offset(179, 142), 5.5, eyePaint);
+
+  final smilePaint = Paint()
+    ..color = const Color(0xFFBE185D)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 4.5
+    ..strokeCap = StrokeCap.round;
+  canvas.drawArc(const Rect.fromLTWH(144, 150, 32, 20), 0.15 * pi, 0.7 * pi, false, smilePaint);
+
+  final picture = recorder.endRecording();
+  final img = await picture.toImage(size.toInt(), size.toInt());
+  final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+  return byteData!.buffer.asUint8List();
+}
+
+/// Menampilkan dialog pemilihan 5 varian avatar secara instan
+Future<int?> _showAvatarSelectorDialog(BuildContext context, {required bool isFemale}) async {
+  return showDialog<int>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: Text(
+        isFemale ? tx(ctx, 'Pilih Avatar Perempuan', 'Choose Female Avatar') : tx(ctx, 'Pilih Avatar Laki-laki', 'Choose Male Avatar'),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+      content: SizedBox(
+        width: 280,
+        child: GridView.builder(
+          shrinkWrap: true,
+          itemCount: 5,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          itemBuilder: (context, index) {
+            return FutureBuilder<Uint8List>(
+              future: _buildAvatarBytes(isFemale: isFemale, variant: index),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Container(
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.grey.withAlpha(40)),
+                  );
+                }
+                return InkWell(
+                  onTap: () => Navigator.pop(ctx, index),
+                  borderRadius: BorderRadius.circular(50),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.primary, width: 2),
+                    ),
+                    child: ClipOval(
+                      child: Image.memory(snapshot.data!, fit: BoxFit.cover),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(tx(ctx, 'Batal', 'Cancel')),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Menampilkan pilihan galeri / kamera / pilihan 5 avatar / hapus foto
 Future<PhotoResult?> choosePhoto(BuildContext context, {required bool hasPhoto}) async {
   final choice = await showModalBottomSheet<String>(
     context: context,
     shape: kPSheetShape,
     builder: (sheet) => SafeArea(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const SizedBox(height: 14),
-        Text(tx(sheet, 'Foto Profil', 'Profile Photo'),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 6),
-        ListTile(
-          leading: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
-          title: Text(tx(sheet, 'Pilih dari galeri', 'Choose from gallery')),
-          onTap: () => Navigator.pop(sheet, 'gallery'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primary),
-          title: Text(tx(sheet, 'Ambil foto dengan kamera', 'Take a photo')),
-          onTap: () => Navigator.pop(sheet, 'camera'),
-        ),
-        if (hasPhoto)
+      child: SingleChildScrollView(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 14),
+          Text(tx(sheet, 'Foto Profil', 'Profile Photo'),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
           ListTile(
-            leading: const Icon(Icons.delete_outline, color: AppColors.danger),
-            title: Text(tx(sheet, 'Hapus foto', 'Remove photo'), style: const TextStyle(color: AppColors.danger)),
-            onTap: () => Navigator.pop(sheet, 'remove'),
+            leading: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
+            title: Text(tx(sheet, 'Pilih dari galeri', 'Choose from gallery')),
+            onTap: () => Navigator.pop(sheet, 'gallery'),
           ),
-        const SizedBox(height: 8),
-      ]),
+          ListTile(
+            leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primary),
+            title: Text(tx(sheet, 'Ambil foto dengan kamera', 'Take a photo')),
+            onTap: () => Navigator.pop(sheet, 'camera'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.face_rounded, color: Color(0xFF2563EB)),
+            title: Text(tx(sheet, 'Avatar Laki-laki (5 Pilihan)', 'Male Avatar (5 Choices)')),
+            onTap: () => Navigator.pop(sheet, 'avatar_male'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.face_3_rounded, color: Color(0xFFEC4899)),
+            title: Text(tx(sheet, 'Avatar Perempuan (5 Pilihan)', 'Female Avatar (5 Choices)')),
+            onTap: () => Navigator.pop(sheet, 'avatar_female'),
+          ),
+          if (hasPhoto)
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: AppColors.danger),
+              title: Text(tx(sheet, 'Hapus foto', 'Remove photo'), style: const TextStyle(color: AppColors.danger)),
+              onTap: () => Navigator.pop(sheet, 'remove'),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
     ),
   );
   if (choice == null) return null;
   if (choice == 'remove') return PhotoResult.removed();
+  
+  if (choice == 'avatar_male' || choice == 'avatar_female') {
+    final isFem = choice == 'avatar_female';
+    final selectedVariant = await _showAvatarSelectorDialog(context, isFemale: isFem);
+    if (selectedVariant == null) return null;
+    final bytes = await _buildAvatarBytes(isFemale: isFem, variant: selectedVariant);
+    return PhotoResult.picked(bytes);
+  }
+
   try {
     final x = await ImagePicker().pickImage(
       source: choice == 'camera' ? ImageSource.camera : ImageSource.gallery,

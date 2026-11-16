@@ -881,7 +881,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(
                 '$earned ${tx(context, 'badge', 'badges')} • Level ${levelOf(s.totalPoints).name} • ${s.totalEvents} ${tx(context, 'kegiatan', 'activities')}',
                 style: TextStyle(fontSize: 11.5, color: muted(context)),
-              ),
+              ), 
             ]),
           ),
           Icon(Icons.chevron_right, color: muted(context)),

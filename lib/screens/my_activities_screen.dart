@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../core/nav_bus.dart';
 import '../core/theme.dart';
 import '../core/utils.dart';
 import '../models/models.dart';
@@ -14,31 +15,73 @@ Future<void> showPendingCelebrations(BuildContext context) async {
   // Bisa dikosongkan atau diisi logika pop-up gamifikasi jika diperlukan
 }
 
-class MyActivitiesScreen extends StatelessWidget {
+class MyActivitiesScreen extends StatefulWidget {
   const MyActivitiesScreen({super.key, this.onNavigateToEvent});
 
   final VoidCallback? onNavigateToEvent;
+
+  @override
+  State<MyActivitiesScreen> createState() => _MyActivitiesScreenState();
+}
+
+class _MyActivitiesScreenState extends State<MyActivitiesScreen> with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+  String? _highlightId;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    navRequest.addListener(_onNavRequest);
+  }
+
+  @override
+  void dispose() {
+    navRequest.removeListener(_onNavRequest);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // Dipanggil saat ada permintaan membuka Riwayat (mis. dari halaman Pendaftaran Berhasil)
+  void _onNavRequest() {
+    final r = navRequest.value;
+    if (r == null || r.tab != 2 || !mounted) return;
+    setState(() => _highlightId = r.highlightRegId);
+    _tabController.animateTo(r.subTab.clamp(0, 1).toInt());
+    if (r.highlightRegId != null) {
+      Future.delayed(const Duration(seconds: 6), () {
+        if (mounted && _highlightId == r.highlightRegId) {
+          setState(() => _highlightId = null);
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
     final all = s.myRegs;
     final done = s.attendedRegs;
-    return DefaultTabController(
-      length: 2,
-      child: Column(children: [
-        const Padding(
-            padding: EdgeInsets.only(top: 16, bottom: 8),
-            child: Text('Aktivitas Saya', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
-        const TabBar(tabs: [Tab(text: 'Mengikuti'), Tab(text: 'Selesai')]),
-        Expanded(
-          child: TabBarView(children: [
-            _RegList(all, 'Belum ada kegiatan', 'Daftar kegiatan pertamamu dan mulai berkontribusi.', onNavigateToEvent),
-            _RegList(done, 'Belum ada kegiatan selesai', 'Kegiatan yang sudah kamu hadiri akan muncul di sini.', onNavigateToEvent),
-          ]),
+    return Column(children: [
+      const Padding(
+          padding: EdgeInsets.only(top: 16, bottom: 8),
+          child: Text('Aktivitas Saya', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+      TabBar(
+        controller: _tabController,
+        tabs: const [Tab(text: 'Mengikuti'), Tab(text: 'Selesai')],
+      ),
+      Expanded(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _RegList(all, 'Belum ada kegiatan', 'Daftar kegiatan pertamamu dan mulai berkontribusi.',
+                widget.onNavigateToEvent, _highlightId),
+            _RegList(done, 'Belum ada kegiatan selesai', 'Kegiatan yang sudah kamu hadiri akan muncul di sini.',
+                widget.onNavigateToEvent, _highlightId),
+          ],
         ),
-      ]),
-    );
+      ),
+    ]);
   }
 }
 
@@ -46,8 +89,9 @@ class _RegList extends StatelessWidget {
   final List<Registration> items;
   final String emptyTitle, emptySub;
   final VoidCallback? onNavigateToEvent;
+  final String? highlightId;
 
-  const _RegList(this.items, this.emptyTitle, this.emptySub, this.onNavigateToEvent);
+  const _RegList(this.items, this.emptyTitle, this.emptySub, this.onNavigateToEvent, this.highlightId);
 
   @override
   Widget build(BuildContext context) {
@@ -67,14 +111,15 @@ class _RegList extends StatelessWidget {
       );
     }
     return ListView(padding: const EdgeInsets.all(16), children: [
-      for (final r in items) _RegTile(r),
+      for (final r in items) _RegTile(r, highlight: r.id == highlightId),
     ]);
   }
 }
 
 class _RegTile extends StatelessWidget {
   final Registration r;
-  const _RegTile(this.r);
+  final bool highlight;
+  const _RegTile(this.r, {this.highlight = false});
 
   void _actions(BuildContext context, EventModel e) {
     final s = context.read<AppState>();
@@ -185,23 +230,52 @@ class _RegTile extends StatelessWidget {
         : r.status == RegStatus.attended
             ? Theme.of(context).colorScheme.primary
             : Colors.grey;
-    return AppCard(
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(10),
-      onTap: () => _actions(context, e),
-      child: Row(children: [
-        EventImage(e, width: 62, height: 62),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(e.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-            const SizedBox(height: 4),
-            Text(fmtDate(e.date), style: TextStyle(fontSize: 11, color: muted(context))),
-          ]),
-        ),
-        StatusChip(label, color),
-      ]),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: highlight ? primary : Colors.transparent, width: 2),
+        boxShadow: highlight
+            ? [BoxShadow(color: primary.withOpacity(0.25), blurRadius: 14, offset: const Offset(0, 4))]
+            : [],
+      ),
+      child: AppCard(
+        padding: const EdgeInsets.all(10),
+        onTap: () => _actions(context, e),
+        child: Row(children: [
+          EventImage(e, width: 62, height: 62),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              if (highlight)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('Baru saja didaftarkan',
+                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: primary)),
+                ),
+              Text(e.title, maxLines: 2, overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              const SizedBox(height: 4),
+              Text('${fmtDate(e.date)} • ${e.time}',
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, color: muted(context))),
+              const SizedBox(height: 2),
+              Text(e.location,
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, color: muted(context))),
+              const SizedBox(height: 2),
+              Text('Kode: ${r.code}',
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: muted(context))),
+            ]),
+          ),
+          const SizedBox(width: 8),
+          StatusChip(label, color),
+        ]),
+      ),
     );
   }
 }

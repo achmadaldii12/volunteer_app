@@ -13,6 +13,7 @@ import 'profile_screen.dart';
 import 'search_screen.dart';
 import 'my_activities_screen.dart';
 import 'community_screen.dart';
+import '../core/nav_bus.dart'; // <-- BARU
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -23,6 +24,26 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+
+  // <-- BARU: mulai
+  @override
+  void initState() {
+    super.initState();
+    navRequest.addListener(_onNavRequest);
+  }
+
+  @override
+  void dispose() {
+    navRequest.removeListener(_onNavRequest);
+    super.dispose();
+  }
+
+  // Pindah tab jika ada permintaan dari halaman lain (mis. Pendaftaran Berhasil)
+  void _onNavRequest() {
+    final r = navRequest.value;
+    if (r != null && mounted) changeTab(r.tab);
+  }
+  // <-- BARU: selesai
 
   // Method publik untuk mengubah tab secara aman
   void changeTab(int index) {

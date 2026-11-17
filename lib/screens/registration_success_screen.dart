@@ -99,7 +99,6 @@ class RegistrationSuccessScreen extends StatelessWidget {
   }
 
   void _goHistory(BuildContext context) {
-    // Kembali ke halaman utama, lalu buka Riwayat > tab Mengikuti
     Navigator.of(context).popUntil((r) => r.isFirst);
     navRequest.value = NavRequest(2, subTab: 0, highlightRegId: reg.id);
   }
@@ -117,7 +116,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
     if (e == null) return const Scaffold(body: Center(child: Text('Kegiatan tidak ditemukan')));
 
     final dark = isDark(context);
-    final wide = MediaQuery.of(context).size.width >= 900;
+    final desktop = MediaQuery.of(context).size.width >= 900;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -125,7 +124,8 @@ class RegistrationSuccessScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text(fresh ? '' : 'Tiket Saya'),
+        centerTitle: true,
+        title: Text(fresh ? '' : 'Tiket Saya', style: const TextStyle(fontWeight: FontWeight.w800)),
       ),
       body: Container(
         width: double.infinity,
@@ -142,31 +142,28 @@ class RegistrationSuccessScreen extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-              top: -60,
-              right: -60,
+              top: -70,
+              right: -70,
               child: Container(
-                width: 220,
-                height: 220,
+                width: 240,
+                height: 240,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: _red.withOpacity(dark ? 0.06 : 0.08)),
               ),
             ),
             Positioned(
-              bottom: -80,
-              left: -60,
+              bottom: -90,
+              left: -70,
               child: Container(
-                width: 260,
-                height: 260,
+                width: 280,
+                height: 280,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: _red.withOpacity(dark ? 0.05 : 0.07)),
               ),
             ),
             SafeArea(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(wide ? 32 : 16, kToolbarHeight + 8, wide ? 32 : 16, 28),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1100),
-                    child: wide ? _wideLayout(context, s, e) : _narrowLayout(context, s, e),
-                  ),
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(desktop ? 32 : 16, 16, desktop ? 32 : 16, 28),
+                  child: desktop ? _desktopLayout(context, s, e) : _mobileLayout(context, s, e),
                 ),
               ),
             ),
@@ -176,133 +173,216 @@ class RegistrationSuccessScreen extends StatelessWidget {
     );
   }
 
-  Widget _wideLayout(BuildContext context, AppState s, EventModel e) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Expanded(flex: 4, child: Center(child: _Celebration())),
-        const SizedBox(width: 16),
-        Expanded(
-          flex: 7,
-          child: Column(
+  // ------------------------------------------------------------ layout laptop / desktop
+  Widget _desktopLayout(BuildContext context, AppState s, EventModel e) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 980),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _brandHeader(context, big: true),
+          const SizedBox(height: 26),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _header(context),
-              const SizedBox(height: 18),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 620),
-                child: _eventCard(context, e, true),
-              ),
-              const SizedBox(height: 16),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: _qrCard(context, s, e),
-              ),
-              const SizedBox(height: 20),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 700),
-                child: _actions(context, e, true),
-              ),
+              Expanded(flex: 6, child: _eventCardTall(context, e)),
+              const SizedBox(width: 22),
+              Expanded(flex: 5, child: _qrCard(context, s, e)),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: 24),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 780),
+            child: _actions(context, e, true),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _narrowLayout(BuildContext context, AppState s, EventModel e) {
-    return Column(
-      children: [
-        _header(context),
-        const SizedBox(height: 16),
-        _eventCard(context, e, false),
-        const SizedBox(height: 14),
-        _qrCard(context, s, e),
-        const SizedBox(height: 18),
-        _actions(context, e, false),
-      ],
+  // ------------------------------------------------------------ layout HP / tablet
+  Widget _mobileLayout(BuildContext context, AppState s, EventModel e) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 560),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _brandHeader(context, big: false),
+          const SizedBox(height: 20),
+          _eventCardCompact(context, e),
+          const SizedBox(height: 14),
+          _qrCard(context, s, e),
+          const SizedBox(height: 18),
+          _actions(context, e, false),
+        ],
+      ),
     );
   }
 
   // ------------------------------------------------------------ bagian
-  Widget _header(BuildContext context) {
-    final dark = isDark(context);
-    if (!fresh) {
-      return Column(
-        children: [
-          const Icon(Icons.confirmation_number_outlined, color: _red, size: 40),
-          const SizedBox(height: 8),
-          Text('Tiket Kehadiran',
-              style: TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.w800, color: dark ? Colors.white : const Color(0xFF7F1D1D))),
-        ],
-      );
-    }
-    return Column(
-      children: [
-        Container(
-          width: 108,
-          height: 108,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.success.withOpacity(0.12),
+  Widget _logo(double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFFFFD6D6), width: 3),
+        boxShadow: [BoxShadow(color: _red.withOpacity(0.22), blurRadius: 26, offset: const Offset(0, 10))],
+      ),
+      child: ClipOval(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset(
+            'assets/image/logo_volunteer.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) =>
+                const Icon(Icons.volunteer_activism, color: AppColors.primary, size: 48),
           ),
-          child: Container(
-            width: 82,
-            height: 82,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Color(0xFF22C55E), Color(0xFF16A34A)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(color: AppColors.success.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8)),
-              ],
-            ),
-            child: const Icon(Icons.check_rounded, color: Colors.white, size: 52),
+        ),
+      ),
+    );
+  }
+
+  Widget _brandHeader(BuildContext context, {required bool big}) {
+    final dark = isDark(context);
+    final size = big ? 116.0 : 100.0;
+    final titleColor = dark ? Colors.white : const Color(0xFF7F1D1D);
+
+    final label = reg.status == RegStatus.registered
+        ? 'Terdaftar'
+        : reg.status == RegStatus.attended
+            ? 'Sudah hadir'
+            : 'Dibatalkan';
+    final color = reg.status == RegStatus.registered
+        ? AppColors.success
+        : reg.status == RegStatus.attended
+            ? _red
+            : Colors.grey;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: size + 14,
+          height: size + 14,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              _logo(size),
+              if (fresh)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF22C55E), Color(0xFF16A34A)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(color: AppColors.success.withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4)),
+                      ],
+                    ),
+                    child: const Icon(Icons.check_rounded, color: Colors.white, size: 24),
+                  ),
+                ),
+            ],
           ),
         ),
         const SizedBox(height: 14),
-        Text('Pendaftaran Berhasil!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 28, fontWeight: FontWeight.w800, color: dark ? Colors.white : const Color(0xFF7F1D1D))),
+        Text(
+          fresh ? 'Pendaftaran Berhasil!' : 'Tiket Kehadiran',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: big ? 30 : 24, fontWeight: FontWeight.w800, color: titleColor),
+        ),
         const SizedBox(height: 6),
-        Text('Terima kasih telah mendaftar pada kegiatan ini.',
-            textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: muted(context))),
+        Text(
+          fresh ? 'Terima kasih telah mendaftar pada kegiatan ini.' : 'Simpan tiket ini untuk registrasi ulang di lokasi.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 13.5, color: muted(context)),
+        ),
+        if (!fresh) ...[
+          const SizedBox(height: 10),
+          StatusChip(label, color),
+        ],
       ],
     );
   }
 
-  Widget _eventCard(BuildContext context, EventModel e, bool wide) {
-    final dark = isDark(context);
-    Widget row(IconData icon, String text, {bool bold = false}) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: const Color(0xFFF97316), size: 18),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(text,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: bold ? 15 : 13, fontWeight: bold ? FontWeight.w800 : FontWeight.w500, height: 1.3)),
+  Widget _infoRow(IconData icon, String text, {bool bold = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: const Color(0xFFF97316), size: 19),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: bold ? 16 : 13.5,
+                fontWeight: bold ? FontWeight.w800 : FontWeight.w500,
+                height: 1.35,
               ),
-            ],
+            ),
           ),
-        );
+        ],
+      ),
+    );
+  }
 
+  BoxDecoration _pinkCard(bool dark) => BoxDecoration(
+        color: dark ? const Color(0xFF2A1B1B) : const Color(0xFFFFEDED),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: dark ? Colors.white12 : const Color(0xFFF8D4D4)),
+      );
+
+  // Kartu event untuk layar lebar: foto di atas, info di bawah (tanpa Expanded)
+  Widget _eventCardTall(BuildContext context, EventModel e) {
+    final dark = isDark(context);
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: _pinkCard(dark),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: 220,
+            child: EventImage(e, width: double.infinity, height: 220, radius: 0),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _infoRow(Icons.event_available, e.title, bold: true),
+                _infoRow(Icons.schedule, '${fmtLongDate(e.date)} • ${e.time}'),
+                _infoRow(Icons.location_on, e.location),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Kartu event untuk HP: info di kiri, foto kecil di kanan
+  Widget _eventCardCompact(BuildContext context, EventModel e) {
+    final dark = isDark(context);
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: dark ? const Color(0xFF2A1B1B) : const Color(0xFFFFEDED),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: dark ? Colors.white12 : const Color(0xFFF8D4D4)),
-      ),
+      decoration: _pinkCard(dark),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -310,9 +390,9 @@ class RegistrationSuccessScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                row(Icons.event_available, e.title, bold: true),
-                row(Icons.schedule, '${fmtLongDate(e.date)} • ${e.time}'),
-                row(Icons.location_on, e.location),
+                _infoRow(Icons.event_available, e.title, bold: true),
+                _infoRow(Icons.schedule, '${fmtLongDate(e.date)} • ${e.time}'),
+                _infoRow(Icons.location_on, e.location),
               ],
             ),
           ),
@@ -320,9 +400,9 @@ class RegistrationSuccessScreen extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: SizedBox(
-              width: wide ? 140 : 86,
-              height: wide ? 100 : 86,
-              child: EventImage(e, width: wide ? 140 : 86, height: wide ? 100 : 86, radius: 16),
+              width: 84,
+              height: 84,
+              child: EventImage(e, width: 84, height: 84, radius: 16),
             ),
           ),
         ],
@@ -334,7 +414,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
     final dark = isDark(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 16),
       decoration: BoxDecoration(
         color: dark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -342,17 +422,19 @@ class RegistrationSuccessScreen extends StatelessWidget {
         boxShadow: [BoxShadow(color: _red.withOpacity(dark ? 0 : 0.08), blurRadius: 24, offset: const Offset(0, 8))],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.grey.shade300),
             ),
-            child: QrImageView(data: reg.code, size: 176, backgroundColor: Colors.white),
+            child: QrImageView(data: reg.code, size: 180, backgroundColor: Colors.white),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           const Text('Kode Pendaftaran:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
           Container(
@@ -361,17 +443,13 @@ class RegistrationSuccessScreen extends StatelessWidget {
               color: dark ? const Color(0xFF2A1B1B) : const Color(0xFFFFE9E9),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(reg.code,
-                style: const TextStyle(
-                    color: _red, fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: 1)),
+            child: Text(
+              reg.code,
+              style: const TextStyle(color: _red, fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: 1),
+            ),
           ),
           const SizedBox(height: 4),
           Text('Atas nama ${s.user?.name ?? '-'}', style: TextStyle(fontSize: 12, color: muted(context))),
-          if (reg.status != RegStatus.registered) ...[
-            const SizedBox(height: 8),
-            StatusChip(reg.status == RegStatus.attended ? 'Sudah hadir' : 'Dibatalkan',
-                reg.status == RegStatus.attended ? AppColors.success : Colors.grey),
-          ],
           const SizedBox(height: 14),
           Wrap(
             alignment: WrapAlignment.center,
@@ -413,8 +491,11 @@ class RegistrationSuccessScreen extends StatelessWidget {
               Icon(Icons.info_outline, size: 15, color: muted(context)),
               const SizedBox(width: 6),
               Flexible(
-                child: Text('Tunjukkan kode ini saat registrasi ulang di lokasi kegiatan.',
-                    textAlign: TextAlign.center, style: TextStyle(fontSize: 11.5, color: muted(context))),
+                child: Text(
+                  'Tunjukkan kode ini saat registrasi ulang di lokasi kegiatan.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 11.5, color: muted(context)),
+                ),
               ),
             ],
           ),
@@ -423,7 +504,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
     );
   }
 
-  Widget _actions(BuildContext context, EventModel e, bool wide) {
+  Widget _actions(BuildContext context, EventModel e, bool row) {
     final dark = isDark(context);
 
     final detail = SizedBox(
@@ -474,7 +555,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
       ),
     );
 
-    if (wide) {
+    if (row) {
       return Row(
         children: [
           Expanded(child: detail),
@@ -493,69 +574,6 @@ class RegistrationSuccessScreen extends StatelessWidget {
         const SizedBox(height: 10),
         SizedBox(width: double.infinity, child: home),
       ],
-    );
-  }
-}
-
-// ------------------------------------------------------------ ilustrasi
-class _Celebration extends StatelessWidget {
-  const _Celebration();
-
-  Widget _bubble(IconData icon, Color color, double size) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
-      ),
-      child: Icon(icon, color: color, size: size * 0.5),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 320,
-      height: 320,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 280,
-            height: 280,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [Color(0xFFFFD1D1), Color(0xFFFFEEEE)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          Container(
-            width: 170,
-            height: 170,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [AppColors.primaryLight, AppColors.primaryDark],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(color: AppColors.primary.withOpacity(0.35), blurRadius: 26, offset: const Offset(0, 10)),
-              ],
-            ),
-            child: const Icon(Icons.volunteer_activism, color: Colors.white, size: 92),
-          ),
-          Positioned(top: 22, left: 40, child: _bubble(Icons.celebration, const Color(0xFFF59E0B), 54)),
-          Positioned(top: 44, right: 30, child: _bubble(Icons.favorite, AppColors.primary, 50)),
-          Positioned(bottom: 40, left: 30, child: _bubble(Icons.star_rounded, const Color(0xFFF97316), 50)),
-          Positioned(bottom: 24, right: 46, child: _bubble(Icons.groups_2, const Color(0xFF2563EB), 56)),
-        ],
-      ),
     );
   }
 }

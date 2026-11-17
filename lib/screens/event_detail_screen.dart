@@ -9,6 +9,7 @@ import '../models/models.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'registration_success_screen.dart';
+import 'biodata_form_screen.dart'; // <-- BARU
 import 'registration_screens.dart';
 
 class EventDetailScreen extends StatefulWidget {
@@ -48,7 +49,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
     // Buka halaman biodata dulu. Jika berbayar, setelah biodata lanjut ke pembayaran.
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => RegistrationFormScreen(widget.e)),
+      MaterialPageRoute(builder: (_) => BiodataRelawanScreen(widget.e)), // <-- BARU
     );
   }
 

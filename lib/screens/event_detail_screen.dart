@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../core/theme.dart';
 import '../core/utils.dart';
 import '../models/models.dart';
@@ -19,8 +21,10 @@ class EventDetailScreen extends StatefulWidget {
 
 class _EventDetailScreenState extends State<EventDetailScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final PageController _photoController = PageController();
+  int _photoIndex = 0;
 
-  // Status pengingat (tampilan saja, belum tersambung ke notifikasi sistem)
+  // Status pengingat (disimpan di perangkat per akun + per event)
   bool _reminderOn = false;
 
   @override
@@ -30,11 +34,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+    _loadReminder();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _photoController.dispose();
     super.dispose();
   }
 
@@ -48,6 +54,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
 
   // ---------------------------------------------------------------- helpers
   static const Color _red = AppColors.primary;
+  static const String _reminderKey = 'event_reminders';
 
   Color _surface(BuildContext context) => isDark(context) ? const Color(0xFF1E1E1E) : Colors.white;
   Color _pink(BuildContext context) => isDark(context) ? const Color(0xFF2A1B1B) : const Color(0xFFFFF1F1);
@@ -71,44 +78,150 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
   String _shareText() =>
       '${widget.e.title} - ${fmtLongDate(widget.e.date)}, ${widget.e.location}. Ayo ikut di aplikasi Volunteer!';
 
-  void _copyShare(String message) {
-    Clipboard.setData(ClipboardData(text: _shareText()));
+  void _snack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void _openImageViewer() {
+  void _copyShare(String message) {
+    Clipboard.setData(ClipboardData(text: _shareText()));
+    _snack(message);
+  }
+
+  // Daftar foto event: foto utama + foto lain dari aset aplikasi (total 5)
+  List<String> _photos() {
+    final first = widget.e.image.trim();
+    final m = RegExp(r'event_(\d+)\.').firstMatch(first);
+    var k = m != null ? int.parse(m.group(1)!) : 1;
+    final list = <String>[];
+    if (first.isNotEmpty) list.add(first);
+    while (list.length < 5) {
+      k = k % 50 + 1;
+      final p = 'assets/image/event_$k.jpg';
+      if (!list.contains(p)) list.add(p);
+    }
+    return list;
+  }
+
+  Widget _photoImage(String path) {
+    return Image.asset(
+      path,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      errorBuilder: (_, __, ___) => EventImage(widget.e, width: double.infinity, height: double.infinity, radius: 0),
+    );
+  }
+
+  void _goPhoto(int delta) {
+    final n = _photos().length;
+    final next = (_photoIndex + delta + n) % n;
+    _photoController.animateToPage(next, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+  }
+
+  void _openPhotoViewer(int index) {
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(16),
-        child: Stack(
-          children: [
-            InteractiveViewer(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 420,
-                  child: EventImage(widget.e, width: double.infinity, height: 420, radius: 16),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: CircleAvatar(
-                backgroundColor: Colors.black54,
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Navigator.pop(ctx),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      builder: (ctx) => _PhotoViewer(photos: _photos(), initial: index, e: widget.e),
     );
+  }
+
+  // ----------------------------------------------------------- pengingat event
+  Future<void> _loadReminder() async {
+    final uid = context.read<AppState>().user?.id;
+    if (uid == null) return;
+    final p = await SharedPreferences.getInstance();
+    final list = p.getStringList(_reminderKey) ?? <String>[];
+    if (!mounted) return;
+    setState(() => _reminderOn = list.contains('$uid:${widget.e.id}'));
+  }
+
+  Future<void> _toggleReminder() async {
+    final s = context.read<AppState>();
+    final uid = s.user?.id;
+    if (uid == null) {
+      _snack('Masuk ke akun dulu untuk mengatur pengingat');
+      return;
+    }
+    if (widget.e.isFinished && !_reminderOn) {
+      _snack('Kegiatan ini sudah selesai');
+      return;
+    }
+    final p = await SharedPreferences.getInstance();
+    final list = p.getStringList(_reminderKey) ?? <String>[];
+    final key = '$uid:${widget.e.id}';
+    final turningOn = !list.contains(key);
+    if (turningOn) {
+      list.add(key);
+    } else {
+      list.remove(key);
+    }
+    await p.setStringList(_reminderKey, list);
+    if (!mounted) return;
+    setState(() => _reminderOn = turningOn);
+
+    if (turningOn) {
+      // Catat juga di halaman Notifikasi aplikasi
+      s.notifs.insert(
+        0,
+        Notif(
+          id: 'n_rem_${DateTime.now().microsecondsSinceEpoch}',
+          userId: uid,
+          title: 'Pengingat diatur',
+          body: '${widget.e.title} - ${fmtLongDate(widget.e.date)}, ${widget.e.time}. Jangan lupa hadir!',
+          kind: 'reminder',
+          createdAt: DateTime.now(),
+        ),
+      );
+      s.commitCommunity();
+      _snack('Pengingat diatur dan tercatat di Notifikasi');
+    } else {
+      _snack('Pengingat dimatikan');
+    }
+  }
+
+  String _countdownText() {
+    final d = widget.e.date;
+    final now = DateTime.now();
+    final days = DateTime(d.year, d.month, d.day).difference(DateTime(now.year, now.month, now.day)).inDays;
+    if (widget.e.isFinished) return 'Kegiatan ini sudah selesai';
+    if (days <= 0) return 'Kegiatan berlangsung hari ini';
+    if (days == 1) return 'Kegiatan dimulai besok';
+    return 'Kegiatan dimulai $days hari lagi';
+  }
+
+  // -------------------------------------------------------------------- share
+  Future<void> _shareTo(String target) async {
+    final text = _shareText();
+    Uri? uri;
+    switch (target) {
+      case 'whatsapp':
+        uri = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(text)}');
+        break;
+      case 'telegram':
+        uri = Uri.parse('https://t.me/share/url?url=${Uri.encodeComponent(text)}');
+        break;
+      case 'instagram':
+        Clipboard.setData(ClipboardData(text: text));
+        uri = Uri.parse('https://www.instagram.com/');
+        break;
+    }
+    if (uri == null) {
+      _copyShare('Info kegiatan disalin ke clipboard');
+      return;
+    }
+    bool ok = false;
+    try {
+      ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      ok = false;
+    }
+    if (!mounted) return;
+    if (!ok) {
+      Clipboard.setData(ClipboardData(text: text));
+      _snack('Tidak bisa membuka aplikasinya, info kegiatan disalin ke clipboard');
+    } else if (target == 'instagram') {
+      _snack('Info kegiatan disalin, tempel di Instagram');
+    }
   }
 
   Widget _sectionTitle(BuildContext context, IconData icon, String title) {
@@ -307,59 +420,121 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
   }
 
   // ------------------------------------------------------------ gambar utama
+  Widget _arrowButton(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: Colors.black.withOpacity(0.45),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(icon, color: Colors.white, size: 22),
+        ),
+      ),
+    );
+  }
+
   Widget _buildImageBlock(BuildContext context, CategoryInfo c, double height) {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: SizedBox(
-            height: height,
-            width: double.infinity,
-            child: EventImage(widget.e, width: double.infinity, height: height, radius: 24),
-          ),
+    final photos = _photos();
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            PageView.builder(
+              controller: _photoController,
+              itemCount: photos.length,
+              onPageChanged: (i) => setState(() => _photoIndex = i),
+              itemBuilder: (_, i) => GestureDetector(
+                onTap: () => _openPhotoViewer(i),
+                child: _photoImage(photos[i]),
+              ),
+            ),
+            // Badge kategori
+            Positioned(
+              top: 14,
+              left: 14,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(width: 10, height: 10, decoration: const BoxDecoration(color: _red, shape: BoxShape.circle)),
+                    const SizedBox(width: 6),
+                    Text('Event ${widget.e.category}',
+                        style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 12)),
+                  ],
+                ),
+              ),
+            ),
+            // Tombol geser kiri
+            Positioned(
+              left: 10,
+              top: 0,
+              bottom: 0,
+              child: Center(child: _arrowButton(Icons.chevron_left, () => _goPhoto(-1))),
+            ),
+            // Tombol geser kanan
+            Positioned(
+              right: 10,
+              top: 0,
+              bottom: 0,
+              child: Center(child: _arrowButton(Icons.chevron_right, () => _goPhoto(1))),
+            ),
+            // Penghitung foto
+            Positioned(
+              bottom: 14,
+              left: 14,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.55),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.image_outlined, color: Colors.white, size: 16),
+                    const SizedBox(width: 6),
+                    Text('${_photoIndex + 1} / ${photos.length}',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                  ],
+                ),
+              ),
+            ),
+            // Indikator titik
+            Positioned(
+              bottom: 22,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(photos.length, (i) {
+                  final active = i == _photoIndex;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: active ? 18 : 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      color: active ? Colors.white : Colors.white54,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
         ),
-        // Badge kategori
-        Positioned(
-          top: 14,
-          left: 14,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(width: 10, height: 10, decoration: const BoxDecoration(color: _red, shape: BoxShape.circle)),
-                const SizedBox(width: 6),
-                Text('Event ${widget.e.category}',
-                    style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 12)),
-              ],
-            ),
-          ),
-        ),
-        // Penghitung foto
-        Positioned(
-          bottom: 14,
-          left: 14,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.55),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.image_outlined, color: Colors.white, size: 16),
-                SizedBox(width: 6),
-                Text('1 / 1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -875,8 +1050,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
             children: [
               const Icon(Icons.schedule, color: _red, size: 18),
               const SizedBox(width: 8),
-              Text('${fmtLongDate(widget.e.date)} • ${widget.e.time}',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              Expanded(
+                child: Text('${fmtLongDate(widget.e.date)} • ${widget.e.time}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -922,6 +1099,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
   }
 
   Widget _tabGaleri(BuildContext context) {
+    final photos = _photos();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -931,18 +1109,30 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
         children: [
           _sectionTitle(context, Icons.photo_library_outlined, 'Galeri Dokumentasi'),
           const SizedBox(height: 16),
-          GestureDetector(
-            onTap: _openImageViewer,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: SizedBox(
-                height: 220,
-                width: double.infinity,
-                child: EventImage(widget.e, width: double.infinity, height: 220, radius: 16),
-              ),
-            ),
+          LayoutBuilder(
+            builder: (ctx, cons) {
+              final cols = cons.maxWidth > 700 ? 3 : 2;
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: photos.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: cols,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.3,
+                ),
+                itemBuilder: (_, i) => GestureDetector(
+                  onTap: () => _openPhotoViewer(i),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: _photoImage(photos[i]),
+                  ),
+                ),
+              );
+            },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text('Ketuk foto untuk melihat lebih besar', style: TextStyle(fontSize: 12, color: muted(context))),
         ],
       ),
@@ -978,6 +1168,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
               ),
               const SizedBox(height: 8),
               Text('Jangan lupa untuk hadir di kegiatan ini!', style: TextStyle(fontSize: 12.5, color: muted(context))),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.schedule, size: 14, color: _red),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(_countdownText(),
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: _red)),
+                  ),
+                ],
+              ),
               const SizedBox(height: 14),
               SizedBox(
                 width: double.infinity,
@@ -988,16 +1189,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                     side: const BorderSide(color: _red),
                   ),
-                  onPressed: () {
-                    setState(() => _reminderOn = !_reminderOn);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_reminderOn
-                            ? 'Pengingat ditandai. Notifikasi otomatis belum tersedia.'
-                            : 'Pengingat dimatikan'),
-                      ),
-                    );
-                  },
+                  onPressed: _toggleReminder,
                   icon: Icon(
                     _reminderOn ? Icons.notifications_active : Icons.notifications_none,
                     color: _reminderOn ? Colors.white : _red,
@@ -1039,15 +1231,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
               const SizedBox(height: 8),
               Text('Ajak teman-temu untuk ikut serta!', style: TextStyle(fontSize: 12.5, color: muted(context))),
               const SizedBox(height: 14),
-              Row(
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
                 children: [
-                  _shareCircle(Icons.chat, const Color(0xFF25D366), 'Info kegiatan disalin, tempel di WhatsApp'),
-                  const SizedBox(width: 12),
-                  _shareCircle(Icons.send, const Color(0xFF2AABEE), 'Info kegiatan disalin, tempel di Telegram'),
-                  const SizedBox(width: 12),
-                  _shareCircle(Icons.camera_alt, const Color(0xFFE1306C), 'Info kegiatan disalin, tempel di Instagram'),
-                  const SizedBox(width: 12),
-                  _shareCircle(Icons.more_horiz, Colors.black54, 'Info kegiatan disalin ke clipboard', light: true),
+                  _shareCircle(Icons.chat, const Color(0xFF25D366), 'whatsapp'),
+                  _shareCircle(Icons.send, const Color(0xFF2AABEE), 'telegram'),
+                  _shareCircle(Icons.camera_alt, const Color(0xFFE1306C), 'instagram'),
+                  _shareCircle(Icons.more_horiz, Colors.black54, 'more', light: true),
                 ],
               ),
             ],
@@ -1057,15 +1248,117 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
     );
   }
 
-  Widget _shareCircle(IconData icon, Color color, String message, {bool light = false}) {
+  Widget _shareCircle(IconData icon, Color color, String target, {bool light = false}) {
     return InkWell(
       customBorder: const CircleBorder(),
-      onTap: () => _copyShare(message),
+      onTap: () => _shareTo(target),
       child: Container(
         width: 44,
         height: 44,
         decoration: BoxDecoration(color: light ? Colors.white : color, shape: BoxShape.circle),
         child: Icon(icon, color: light ? color : Colors.white, size: 22),
+      ),
+    );
+  }
+}
+
+// Pelihat foto layar besar dengan tombol geser kiri/kanan dan zoom
+class _PhotoViewer extends StatefulWidget {
+  final List<String> photos;
+  final int initial;
+  final EventModel e;
+  const _PhotoViewer({required this.photos, required this.initial, required this.e});
+
+  @override
+  State<_PhotoViewer> createState() => _PhotoViewerState();
+}
+
+class _PhotoViewerState extends State<_PhotoViewer> {
+  late final PageController _controller;
+  late int _index;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initial;
+    _controller = PageController(initialPage: widget.initial);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _go(int delta) {
+    final n = widget.photos.length;
+    final next = (_index + delta + n) % n;
+    _controller.animateToPage(next, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+  }
+
+  Widget _btn(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: Colors.black.withOpacity(0.5),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(icon, color: Colors.white, size: 24),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final h = MediaQuery.of(context).size.height * 0.75;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(16),
+      child: SizedBox(
+        height: h,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: widget.photos.length,
+                onPageChanged: (i) => setState(() => _index = i),
+                itemBuilder: (_, i) => Container(
+                  color: Colors.black,
+                  child: InteractiveViewer(
+                    child: Image.asset(
+                      widget.photos[i],
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) =>
+                          EventImage(widget.e, width: double.infinity, height: double.infinity, radius: 0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(left: 8, top: 0, bottom: 0, child: Center(child: _btn(Icons.chevron_left, () => _go(-1)))),
+            Positioned(right: 8, top: 0, bottom: 0, child: Center(child: _btn(Icons.chevron_right, () => _go(1)))),
+            Positioned(top: 8, right: 8, child: _btn(Icons.close, () => Navigator.pop(context))),
+            Positioned(
+              bottom: 12,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(14)),
+                  child: Text('${_index + 1} / ${widget.photos.length}',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1759,25 +1759,32 @@ class _VolunteerIllustration extends StatelessWidget {
                 ),
               ),
             ),
+            // Logo Volunteer (menggantikan ikon merah). Ubah scale untuk zoom logo.
             Container(
-              width: 118,
-              height: 118,
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
+                color: Colors.white,
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [AppColors.primaryLight, AppColors.primaryDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.35),
+                    color: AppColors.primary.withOpacity(0.28),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: const Icon(Icons.volunteer_activism, color: Colors.white, size: 62),
+              child: ClipOval(
+                child: Transform.scale(
+                  scale: 1.8,
+                  child: Image.asset(
+                    'assets/image/logo_volunteer.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.volunteer_activism, color: AppColors.primary, size: 62),
+                  ),
+                ),
+              ),
             ),
             Positioned(top: 10, left: 22, child: _bubble(Icons.favorite, AppColors.primary, 40)),
             Positioned(top: 26, right: 18, child: _bubble(Icons.verified_user, const Color(0xFF16A34A), 44)),

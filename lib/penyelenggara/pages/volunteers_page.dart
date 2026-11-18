@@ -189,7 +189,7 @@ class _VolunteersPageState extends State<VolunteersPage> {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(v?.name ?? 'Relawan', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
-              Text('${e?.title ?? '-'}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+              Text(e?.title ?? '-', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Colors.black54)),
               Text('Daftar ${fmtDate(r.createdAt)} • ${r.code}', style: const TextStyle(fontSize: 11, color: Colors.black45)),
             ]),
           ),

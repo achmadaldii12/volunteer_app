@@ -489,8 +489,8 @@ class _EventFormState extends State<_EventForm> {
             padding: const EdgeInsets.all(14),
             child: Wrap(alignment: WrapAlignment.end, spacing: 10, runSpacing: 8, children: [
               TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
-              if (!editing || org_isDraft(widget.event!)) ElevatedButton(onPressed: () => _submit(false), style: softBtn(), child: const Text('Simpan Draft')),
-              ElevatedButton(onPressed: () => _submit(true), style: redBtn(), child: Text(editing && !org_isDraft(widget.event!) ? 'Simpan Perubahan' : 'Terbitkan')),
+              if (!editing || _orgIsDraft(widget.event!)) ElevatedButton(onPressed: () => _submit(false), style: softBtn(), child: const Text('Simpan Draft')),
+              ElevatedButton(onPressed: () => _submit(true), style: redBtn(), child: Text(editing && !_orgIsDraft(widget.event!) ? 'Simpan Perubahan' : 'Terbitkan')),
             ]),
           ),
         ]),
@@ -498,5 +498,5 @@ class _EventFormState extends State<_EventForm> {
     );
   }
 
-  bool org_isDraft(EventModel e) => OrgStore.instance.metaOf(e).status == 'draft';
+  bool _orgIsDraft(EventModel e) => OrgStore.instance.metaOf(e).status == 'draft';
 }

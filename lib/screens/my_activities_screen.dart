@@ -597,7 +597,7 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
     ]);
 
     void go(Widget p) => _open(p);
-    final compactPad = const EdgeInsets.symmetric(horizontal: 14, vertical: 9);
+    const compactPad = EdgeInsets.symmetric(horizontal: 14, vertical: 9);
 
     Widget actions;
     if (ongoing) {

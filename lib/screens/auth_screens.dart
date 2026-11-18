@@ -296,8 +296,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _pass = TextEditingController();
 
-  String _selectedRole = 'volunteer';
-
   @override
   void dispose() {
     _email.dispose();
@@ -312,13 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _selectedRole == 'volunteer'
-                ? 'Berhasil masuk sebagai Relawan!'
-                : 'Berhasil masuk sebagai Penyelenggara!',
-          ),
-        ),
+        const SnackBar(content: Text('Berhasil masuk!')),
       );
       _toMain(context);
     }
@@ -373,39 +365,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _roleChip(String role, IconData icon, String label) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final selected = _selectedRole == role;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedRole = role),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected ? primary : (isDark(context) ? Colors.grey[800] : Colors.grey[100]),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 15, color: selected ? Colors.white : Colors.grey[600]),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: selected ? Colors.white : Colors.grey[700],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   /// Kartu formulir login (dipakai di tampilan HP dan laptop)
   Widget _formCard() {
     final primary = Theme.of(context).colorScheme.primary;
@@ -425,19 +384,6 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Masuk Sebagai',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _roleChip('volunteer', Icons.person_outline, 'Relawan'),
-              const SizedBox(width: 8),
-              _roleChip('organizer', Icons.business_outlined, 'Penyelenggara'),
-            ],
-          ),
-          const SizedBox(height: 14),
           AppTextField(
             'Email',
             Icons.mail_outline,

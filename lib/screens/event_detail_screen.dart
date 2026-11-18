@@ -10,7 +10,6 @@ import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'registration_success_screen.dart';
 import 'biodata_form_screen.dart'; // <-- BARU
-import 'registration_screens.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel e;

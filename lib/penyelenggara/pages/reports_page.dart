@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme.dart';
-import '../../models/models.dart';
 import '../../providers/app_state.dart';
 import '../org_widgets.dart';
 import '../organizer_store.dart';

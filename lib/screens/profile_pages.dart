@@ -396,6 +396,7 @@ Future<PhotoResult?> choosePhoto(BuildContext context, {required bool hasPhoto})
   
   if (choice == 'avatar_male' || choice == 'avatar_female') {
     final isFem = choice == 'avatar_female';
+    if (!context.mounted) return null;
     final selectedVariant = await _showAvatarSelectorDialog(context, isFemale: isFem);
     if (selectedVariant == null) return null;
     final bytes = await _buildAvatarBytes(isFemale: isFem, variant: selectedVariant);

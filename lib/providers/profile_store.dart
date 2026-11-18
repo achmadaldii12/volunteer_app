@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/utils.dart';
 import '../models/gamification.dart';
-import '../models/models.dart';
 import 'app_state.dart';
 
 // ============================================================

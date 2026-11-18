@@ -250,7 +250,7 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
                 children: [
                   Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: double.infinity), // penuh layar
+                      constraints: const BoxConstraints(maxWidth: 1100),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         _banner(s, wide),
                         const SizedBox(height: 14),
@@ -266,7 +266,7 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
                             children: [
                               if (list.isEmpty)
                                 SizedBox(
-                                  height: 260,
+                                  height: 340,
                                   child: EmptyState(
                                     Icons.event_busy,
                                     _tab == 0 ? 'Belum ada kegiatan' : 'Belum ada kegiatan selesai',
@@ -751,9 +751,9 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
     ];
 
     final inner = maxWidth - 48;
-    final cols = inner >= 1500 ? 5 : (inner >= 1000 ? 4 : (inner >= 640 ? 3 : 2));
+    final cols = inner >= 1000 ? 4 : (inner >= 640 ? 3 : 2);
     const gap = 10.0;
-    final double avail = inner; // mengikuti lebar layar
+    final double avail = maxWidth >= 860 ? (inner > 1100 ? 1100.0 : inner) : inner;
     final double w = (avail - 32 - gap * (cols - 1)) / cols;
 
     return PCard(

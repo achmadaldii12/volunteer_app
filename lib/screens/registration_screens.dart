@@ -306,6 +306,118 @@ const List<_PayMethod> _kPayMethods = [
   _PayMethod('qris', 'QRIS', 'QRIS', Icons.qr_code_2),
 ];
 
+/// true = pakai gambar logo dari folder assets/payment/<id>.png
+/// (bca, mandiri, bni, bri, gopay, ovo, dana, shopeepay, qris).
+/// Jika gambar tidak ditemukan, otomatis memakai lencana warna sebagai cadangan.
+const bool kUsePaymentLogoImages = true;
+
+/// Lencana logo metode pembayaran (warna merek). Bukan gambar resmi.
+class _PayLogo extends StatelessWidget {
+  final _PayMethod m;
+  const _PayLogo(this.m);
+
+  @override
+  Widget build(BuildContext context) {
+    final badge = _badge();
+    return SizedBox(
+      width: 72,
+      height: 34,
+      child: Center(
+        child: kUsePaymentLogoImages
+            ? Image.asset(
+                'assets/payment/${m.id}.png',
+                width: 68,
+                height: 30,
+                fit: BoxFit.contain,
+                alignment: Alignment.centerLeft,
+                errorBuilder: (_, __, ___) => badge,
+              )
+            : badge,
+      ),
+    );
+  }
+
+  Widget _badge() {
+    Color bg = const Color(0xFF0060AF);
+    Color fg = Colors.white;
+    Color? border;
+    String t = m.name;
+    double fs = 12;
+    switch (m.id) {
+      case 'bca':
+        bg = const Color(0xFF0060AF);
+        t = 'BCA';
+        fs = 14;
+        break;
+      case 'mandiri':
+        bg = const Color(0xFF003D79);
+        fg = const Color(0xFFFDB913);
+        t = 'mandiri';
+        fs = 11;
+        break;
+      case 'bni':
+        bg = Colors.white;
+        fg = const Color(0xFFF37021);
+        border = const Color(0xFF00A19B);
+        t = 'BNI';
+        fs = 14;
+        break;
+      case 'bri':
+        bg = const Color(0xFF00529C);
+        t = 'BRI';
+        fs = 14;
+        break;
+      case 'gopay':
+        bg = const Color(0xFF00AED6);
+        t = 'GoPay';
+        fs = 11.5;
+        break;
+      case 'ovo':
+        bg = const Color(0xFF4C2A86);
+        t = 'OVO';
+        fs = 14;
+        break;
+      case 'dana':
+        bg = const Color(0xFF118EEA);
+        t = 'DANA';
+        fs = 12.5;
+        break;
+      case 'shopeepay':
+        bg = const Color(0xFFEE4D2D);
+        t = 'ShopeePay';
+        fs = 9.5;
+        break;
+      case 'qris':
+        bg = Colors.white;
+        fg = Colors.black87;
+        border = const Color(0xFFE53935);
+        t = 'QRIS';
+        fs = 13;
+        break;
+    }
+    return Container(
+      width: 56,
+      height: 30,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(7),
+        border: border == null ? null : Border.all(color: border, width: 1.4),
+      ),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3),
+          child: Text(
+            t,
+            style: TextStyle(color: fg, fontWeight: FontWeight.w900, fontSize: fs, letterSpacing: 0.2),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class PaymentScreen extends StatefulWidget {
   final EventModel event;
   final String participantName;
@@ -373,7 +485,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
             ),
             child: Row(children: [
-              Icon(m.icon, color: selected ? AppColors.primary : muted(context)),
+              _PayLogo(m),
               const SizedBox(width: 12),
               Expanded(child: Text(m.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5))),
               Icon(

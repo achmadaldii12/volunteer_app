@@ -489,14 +489,18 @@ class HomeScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
+                // Logo di-zoom (ukuran kotak tetap 60x60, isi logo diperbesar)
                 SizedBox(
                   width: 60,
                   height: 60,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/image/logo_volunteer.png',
-                      fit: BoxFit.contain,
+                    child: Transform.scale(
+                      scale: 2.0, // ubah angka ini: 1.5 = sedikit, 2.5 = lebih besar
+                      child: Image.asset(
+                        'assets/image/logo_volunteer.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
@@ -515,22 +519,50 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Ikon ranking & notifikasi: kecil + latar bulat merah
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.emoji_events, color: Colors.amber, size: 22),
-                      tooltip: 'Achievement & Ranking',
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const AchievementScreen()));
-                      },
+                    Tooltip(
+                      message: 'Achievement & Ranking',
+                      child: Material(
+                        color: const Color(0xFFE53935),
+                        shape: const CircleBorder(),
+                        elevation: 2,
+                        shadowColor: const Color(0x66E53935),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const AchievementScreen()));
+                          },
+                          child: const SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Icon(Icons.emoji_events, color: Colors.white, size: 20),
+                          ),
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.notifications, color: Colors.red, size: 22),
-                      tooltip: 'Notifikasi',
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen()));
-                      },
+                    const SizedBox(width: 6),
+                    Tooltip(
+                      message: 'Notifikasi',
+                      child: Material(
+                        color: const Color(0xFFE53935),
+                        shape: const CircleBorder(),
+                        elevation: 2,
+                        shadowColor: const Color(0x66E53935),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen()));
+                          },
+                          child: const SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Icon(Icons.notifications, color: Colors.white, size: 20),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

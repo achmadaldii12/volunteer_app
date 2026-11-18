@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'core/theme.dart';
-import 'providers/app_state.dart';
 import 'penyelenggara/organizer_store.dart';
+import 'providers/activity_store.dart';
+import 'providers/app_state.dart';
 import 'providers/profile_store.dart';
 import 'screens/auth_screens.dart';
 
@@ -12,11 +13,14 @@ Future<void> main() async {
   await initializeDateFormatting('id_ID');
   final profile = ProfileStore();
   await profile.load(); // pengaturan tampilan & data tambahan profil
+  final activity = ActivityStore();
+  await activity.load(); // data Aktivitas Saya (evaluasi, catatan, pengajuan, dll.)
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AppState()),
-      ChangeNotifierProvider<OrgStore>.value(value: OrgStore.instance),
       ChangeNotifierProvider<ProfileStore>.value(value: profile),
+      ChangeNotifierProvider<ActivityStore>.value(value: activity),
+      ChangeNotifierProvider<OrgStore>.value(value: OrgStore.instance), // penyelenggara
     ],
     child: const VolunteerApp(),
   ));
@@ -52,6 +56,7 @@ class VolunteerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _applyAccessibility(buildTheme(Brightness.light), p),
       darkTheme: _applyAccessibility(buildTheme(Brightness.dark), p),
+      // Dashboard penyelenggara selalu tema terang
       themeMode: s.user?.role == 'organizer' ? ThemeMode.light : s.themeMode,
       builder: (context, child) {
         final mq = MediaQuery.of(context);

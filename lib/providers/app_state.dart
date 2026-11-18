@@ -7,6 +7,9 @@ import '../data/community_seed.dart';
 import '../models/community.dart';
 import '../models/models.dart';
 import '../models/gamification.dart';
+import '../penyelenggara/organizer_store.dart';
+
+part '../penyelenggara/organizer_bridge.dart';
 
 enum EventSort { soonest, popular, points }
 
@@ -60,12 +63,18 @@ class AppState extends ChangeNotifier {
         await _save();
       }
     }
+    // Penyelenggara: pastikan akun contoh ada & terapkan event penyelenggara
+    if (!users.any((u) => u.role == kOrgRole)) {
+      users.add(buildDemoOrganizer());
+      await _save();
+    }
+    await OrgStore.instance.applyTo(this);
     ready = true;
     notifyListeners();
   }
 
   void _seed() {
-    users = [buildDemoUser()];
+    users = [buildDemoUser(), buildDemoOrganizer()];
     regs = buildDemoRegs();
     notifs = buildDemoNotifs();
     feedbacks = [];
@@ -728,6 +737,7 @@ class AppState extends ChangeNotifier {
     }
     final list = <MonthlyStar>[];
     for (final u in users) {
+      if (u.role == kOrgRole) continue; // penyelenggara tidak masuk leaderboard
       final p = pts[u.id] ?? 0;
       if (p <= 0) continue;
       final w = weeks[u.id]?.length ?? 0;

@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../models/gamification.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
+import '../penyelenggara/organizer_store.dart';
 import 'event_detail_screen.dart';
 import 'registration_success_screen.dart';
 
@@ -220,12 +221,22 @@ class _RegTile extends StatelessWidget {
     final s = context.watch<AppState>();
     final e = s.eventById(r.eventId);
     if (e == null) return const SizedBox.shrink();
-    final label = r.status == RegStatus.registered
+    // Status persetujuan dari penyelenggara (Pending / Ditolak)
+    final apv = context.watch<OrgStore>().regState(s, r);
+    final label = apv == 'pending'
+        ? 'Menunggu persetujuan'
+        : apv == 'rejected'
+            ? 'Ditolak'
+            : r.status == RegStatus.registered
         ? 'Terdaftar'
         : r.status == RegStatus.attended
             ? 'Selesai'
             : 'Dibatalkan';
-    final color = r.status == RegStatus.registered
+    final color = apv == 'pending'
+        ? const Color(0xFFF59E0B)
+        : apv == 'rejected'
+            ? AppColors.danger
+            : r.status == RegStatus.registered
         ? AppColors.success
         : r.status == RegStatus.attended
             ? Theme.of(context).colorScheme.primary

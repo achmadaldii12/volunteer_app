@@ -4,6 +4,7 @@ import '../core/theme.dart';
 import '../core/utils.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
+import '../penyelenggara/organizer_shell.dart';
 import 'main_shell.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => s.user == null ? LoginScreen() : MainShell(),
+        builder: (_) => s.user == null ? LoginScreen() : const RoleHome(),
       ),
     );
   }
@@ -114,7 +115,7 @@ class _SplashScreenState extends State<SplashScreen> {
 void _toMain(BuildContext context) {
   Navigator.pushAndRemoveUntil(
     context,
-    MaterialPageRoute(builder: (_) => const MainShell()),
+    MaterialPageRoute(builder: (_) => const RoleHome()),
     (_) => false,
   );
 }
@@ -130,8 +131,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _form = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _pass = TextEditingController();
-  
-  String _selectedRole = 'volunteer';
 
   @override
   void dispose() {
@@ -146,15 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (err != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _selectedRole == 'volunteer'
-                ? 'Berhasil masuk sebagai Relawan!'
-                : 'Berhasil masuk sebagai Penyelenggara!',
-          ),
-        ),
-      );
+      // Role dibaca dari akun (bukan dipilih di UI): RoleHome mengarahkan sesuai role.
       _toMain(context);
     }
   }
@@ -272,89 +263,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Text(
-                                'Masuk Sebagai',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () => setState(() => _selectedRole = 'volunteer'),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 200),
-                                        padding: const EdgeInsets.symmetric(vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color: _selectedRole == 'volunteer'
-                                              ? primary
-                                              : (isDark(context) ? Colors.grey[800] : Colors.grey[100]),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.person_outline,
-                                              size: 15,
-                                              color: _selectedRole == 'volunteer' ? Colors.white : Colors.grey[600],
-                                            ),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              'Relawan',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12,
-                                                color: _selectedRole == 'volunteer' ? Colors.white : Colors.grey[700],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () => setState(() => _selectedRole = 'organizer'),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 200),
-                                        padding: const EdgeInsets.symmetric(vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color: _selectedRole == 'organizer'
-                                              ? primary
-                                              : (isDark(context) ? Colors.grey[800] : Colors.grey[100]),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.business_outlined,
-                                              size: 15,
-                                              color: _selectedRole == 'organizer' ? Colors.white : Colors.grey[600],
-                                            ),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              'Penyelenggara',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12,
-                                                color: _selectedRole == 'organizer' ? Colors.white : Colors.grey[700],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 14),
                               AppTextField(
                                 'Email',
                                 Icons.mail_outline,

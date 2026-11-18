@@ -6,6 +6,8 @@ class AppUser {
   final String id;
   String name, email, password, phone, city, bio;
   int pastEvents, pastHours, pastPoints, pastImpact;
+  /// 'volunteer' (default) atau 'organizer'. Role disimpan bersama akun.
+  String role;
 
   AppUser({
     required this.id,
@@ -19,6 +21,7 @@ class AppUser {
     this.pastHours = 0,
     this.pastPoints = 0,
     this.pastImpact = 0,
+    this.role = 'volunteer',
   });
 
   String get firstName {
@@ -38,6 +41,7 @@ class AppUser {
         'phone': phone, 'city': city, 'bio': bio,
         'pastEvents': pastEvents, 'pastHours': pastHours,
         'pastPoints': pastPoints, 'pastImpact': pastImpact,
+        'role': role,
       };
 
   factory AppUser.fromJson(Map<String, dynamic> j) => AppUser(
@@ -52,6 +56,7 @@ class AppUser {
         pastHours: (j['pastHours'] ?? 0) as int,
         pastPoints: (j['pastPoints'] ?? 0) as int,
         pastImpact: (j['pastImpact'] ?? 0) as int,
+        role: (j['role'] ?? 'volunteer') as String,
       );
 }
 

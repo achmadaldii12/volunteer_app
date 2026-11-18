@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/theme.dart';
@@ -57,13 +59,22 @@ class EventImage extends StatelessWidget {
     final c = categoryInfo(e.category);
     final String imgPath = e.image.trim();
     const String fallbackAsset = 'assets/image/event_4.jpg';
+    // Poster unggahan penyelenggara disimpan sebagai data URI (base64).
+    Uint8List? memo;
+    if (imgPath.startsWith('data:')) {
+      try {
+        memo = base64Decode(imgPath.substring(imgPath.indexOf(',') + 1));
+      } catch (_) {}
+    }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: SizedBox(
         width: width,
         height: height,
-        child: Image.asset(
+        child: memo != null
+            ? Image.memory(memo, fit: BoxFit.cover)
+            : Image.asset(
           imgPath.isNotEmpty ? imgPath : fallbackAsset,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => Image.asset(

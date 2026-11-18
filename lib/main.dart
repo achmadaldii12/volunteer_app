@@ -3,6 +3,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'core/theme.dart';
 import 'providers/app_state.dart';
+import 'penyelenggara/organizer_store.dart';
 import 'providers/profile_store.dart';
 import 'screens/auth_screens.dart';
 
@@ -14,6 +15,7 @@ Future<void> main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AppState()),
+      ChangeNotifierProvider<OrgStore>.value(value: OrgStore.instance),
       ChangeNotifierProvider<ProfileStore>.value(value: profile),
     ],
     child: const VolunteerApp(),
@@ -50,7 +52,7 @@ class VolunteerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _applyAccessibility(buildTheme(Brightness.light), p),
       darkTheme: _applyAccessibility(buildTheme(Brightness.dark), p),
-      themeMode: s.themeMode,
+      themeMode: s.user?.role == 'organizer' ? ThemeMode.light : s.themeMode,
       builder: (context, child) {
         final mq = MediaQuery.of(context);
         final wide = mq.size.width > 700;

@@ -886,9 +886,21 @@ class AppState extends ChangeNotifier {
   void submitFeedback(String eventTitle, int rating, String text) {
     final u = user;
     if (u == null) return;
-    feedbacks.insert(0, FeedbackItem(
-        id: _id('f'), userId: u.id, eventTitle: eventTitle, text: text.trim(),
-        rating: rating, createdAt: DateTime.now()));
+    // Satu feedback per relawan per kegiatan: kirim ulang = memperbarui yang lama
+    // (id dipertahankan supaya baris di database ikut diperbarui, bukan dobel).
+    final i = feedbacks.indexWhere((f) => f.userId == u.id && f.eventTitle == eventTitle);
+    final item = FeedbackItem(
+        id: i >= 0 ? feedbacks[i].id : _id('f'),
+        userId: u.id,
+        eventTitle: eventTitle,
+        text: text.trim(),
+        rating: rating,
+        createdAt: DateTime.now());
+    if (i >= 0) {
+      feedbacks[i] = item;
+    } else {
+      feedbacks.insert(0, item);
+    }
     _commit();
   }
 

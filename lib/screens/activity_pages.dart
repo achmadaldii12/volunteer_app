@@ -729,6 +729,8 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
       pSnack(context, err);
       return;
     }
+    // Kirim juga sebagai feedback ke database (tabel feedbacks) + tampil di Riwayat Feedback.
+    s.submitFeedback(widget.event.title, _overall, _comment.text.trim());
     final fb = await confirmAct(context, 'Terima kasih!',
         'Evaluasimu tersimpan. Ingin menyimpan komentarmu juga sebagai catatan pengalaman?',
         yes: 'Simpan Catatan');

@@ -56,7 +56,29 @@ class _AttendancePageState extends State<AttendancePage> {
           child: Row(children: [
             CircleAvatar(radius: 21, backgroundColor: c.withOpacity(.12), child: Icon(i, color: c, size: 22)),
             const SizedBox(width: 12),
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('$n', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)), Text(t, style: const TextStyle(fontSize: 12, color: Colors.black54))]),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$n',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                  ),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      t,
+                      maxLines: 1,
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ]),
         );
 

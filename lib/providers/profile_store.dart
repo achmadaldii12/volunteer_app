@@ -119,6 +119,12 @@ class ProfileStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Dipakai sinkronisasi backend: muat ulang data akun dari penyimpanan.
+  void reloadUser(String id) {
+    _users.remove(id);
+    notifyListeners();
+  }
+
   /// Menghapus semua data tambahan akun (dipakai saat akun dihapus).
   void clearUser(String id) {
     _users.remove(id);

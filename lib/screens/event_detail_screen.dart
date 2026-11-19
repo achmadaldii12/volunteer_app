@@ -103,6 +103,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
   }
 
   Widget _photoImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(path, fit: BoxFit.cover, width: double.infinity, height: double.infinity,
+          errorBuilder: (_, __, ___) => EventImage(widget.e, width: double.infinity, height: double.infinity, radius: 0));
+    }
     return Image.asset(
       path,
       fit: BoxFit.cover,

@@ -1,0 +1,14 @@
+# Meneruskan header Authorization ke PHP (Apache sering membuangnya)
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# Jangan tampilkan isi folder
+Options -Indexes
+
+# File config & library tidak boleh dibuka dari browser
+<FilesMatch "^(config\.php|database\.sql)$">
+    Require all denied
+</FilesMatch>

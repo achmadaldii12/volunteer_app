@@ -6,6 +6,8 @@ import '../core/utils.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import '../penyelenggara/organizer_shell.dart';
+import '../services/server_dialog.dart';
+import '../services/sync_service.dart';
 
 // ============================================================
 // KOMPONEN BERSAMA: logo & animasi masuk
@@ -18,6 +20,13 @@ class _LogoBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: () => showServerDialog(context), // pengaturan alamat server backend
+      child: _badge(),
+    );
+  }
+
+  Widget _badge() {
     return Container(
       width: size,
       height: size,
@@ -303,9 +312,13 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
-    final err = context.read<AppState>().login(_email.text, _pass.text);
+    final st = context.read<AppState>();
+    // 1) coba login ke server backend; bila server tidak tersedia / akun lokal -> login lokal bawaan
+    final srv = await ApiSync.instance.login(st, _email.text, _pass.text);
+    if (!mounted) return;
+    final err = srv.handled ? srv.error : st.login(_email.text, _pass.text);
     if (err != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
     } else {
@@ -735,9 +748,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
-    final err = context.read<AppState>().register(_name.text, _email.text, _pass.text);
+    final st = context.read<AppState>();
+    // 1) daftar ke server backend; bila server tidak tersedia -> daftar lokal bawaan
+    final srv = await ApiSync.instance.register(st, _name.text, _email.text, _pass.text);
+    if (!mounted) return;
+    final err = srv.handled ? srv.error : st.register(_name.text, _email.text, _pass.text);
     if (err != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
     } else {

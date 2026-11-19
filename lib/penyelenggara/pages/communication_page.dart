@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme.dart';
+import '../../models/community.dart';
 import '../../providers/app_state.dart';
+import '../../providers/community_logic.dart';
 import '../org_widgets.dart';
 import '../organizer_store.dart';
 
@@ -22,11 +24,17 @@ class _CommunicationPageState extends State<CommunicationPage> {
   final _title = TextEditingController(), _body = TextEditingController();
   String _kind = 'announcement';
   String? _event;
+  // ---- Komunitas relawan ----
+  final _commTitle = TextEditingController(), _commBody = TextEditingController();
+  String _room = 'umum';
+  bool _official = false, _important = false;
 
   @override
   void dispose() {
     _title.dispose();
     _body.dispose();
+    _commTitle.dispose();
+    _commBody.dispose();
     super.dispose();
   }
 
@@ -40,6 +48,24 @@ class _CommunicationPageState extends State<CommunicationPage> {
     _title.clear();
     _body.clear();
     toast(context, n == 0 ? 'Tidak ada penerima untuk target ini' : 'Terkirim ke $n relawan. Muncul di Notifikasi relawan.');
+  }
+
+  /// Mengirim pesan ke ruang Komunitas relawan, atau membuat pengumuman resmi Komunitas.
+  void _sendComm(AppState s) {
+    final body = _commBody.text.trim();
+    if (body.isEmpty) return toast(context, 'Isi pesan wajib diisi');
+    String? err;
+    if (_official) {
+      if (_commTitle.text.trim().isEmpty) return toast(context, 'Judul pengumuman wajib diisi');
+      s.commAdmins.add(s.user!.id); // penyelenggara berhak membuat pengumuman resmi
+      err = s.createAnnouncement(title: _commTitle.text, body: body, important: _important);
+    } else {
+      err = s.sendRoomMessage(roomId: _room, text: body);
+    }
+    if (err != null) return toast(context, err);
+    _commTitle.clear();
+    _commBody.clear();
+    toast(context, _official ? 'Pengumuman resmi terkirim ke Komunitas relawan.' : 'Pesan terkirim ke ruang ${roomById(_room).name}.');
   }
 
   @override
@@ -89,6 +115,43 @@ class _CommunicationPageState extends State<CommunicationPage> {
       ]),
     );
 
+    final comm = OrgSection(
+      title: 'Kirim ke Komunitas Relawan',
+      icon: Icons.forum_rounded,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          activeColor: AppColors.primary,
+          title: const Text('Jadikan pengumuman resmi', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+          subtitle: const Text('Tampil di tab Pengumuman Komunitas & notifikasi relawan', style: TextStyle(fontSize: 11.5)),
+          value: _official,
+          onChanged: (v) => setState(() => _official = v),
+        ),
+        if (!_official)
+          DropdownButtonFormField<String>(
+            value: _room,
+            isExpanded: true,
+            decoration: fieldDeco('Ruang diskusi', icon: Icons.groups_rounded),
+            items: [for (final r in kRooms) DropdownMenuItem<String>(value: r.id, child: Text(r.name))],
+            onChanged: (v) => setState(() => _room = v ?? 'umum'),
+          ),
+        if (_official) ...[
+          TextField(controller: _commTitle, decoration: fieldDeco('Judul pengumuman', icon: Icons.title_rounded)),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            activeColor: AppColors.primary,
+            title: const Text('Tandai penting', style: TextStyle(fontSize: 13)),
+            value: _important,
+            onChanged: (v) => setState(() => _important = v),
+          ),
+        ],
+        const SizedBox(height: 12),
+        TextField(controller: _commBody, minLines: 3, maxLines: 6, decoration: fieldDeco(_official ? 'Isi pengumuman' : 'Pesan', icon: Icons.notes_rounded)),
+        const SizedBox(height: 14),
+        Align(alignment: Alignment.centerRight, child: ElevatedButton.icon(onPressed: () => _sendComm(s), style: redBtn(), icon: const Icon(Icons.send_rounded, size: 17), label: const Text('Kirim ke Komunitas'))),
+      ]),
+    );
+
     final hist = OrgSection(
       title: 'Riwayat Pesan (${history.length})',
       icon: Icons.history_rounded,
@@ -118,8 +181,8 @@ class _CommunicationPageState extends State<CommunicationPage> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const PageHead('Komunikasi', 'Kirim pengumuman, pesan, pengingat, dan info perubahan jadwal'),
       LayoutBuilder(builder: (_, c) {
-        if (c.maxWidth < 900) return Column(children: [compose, const SizedBox(height: 16), hist]);
-        return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(flex: 5, child: compose), const SizedBox(width: 16), Expanded(flex: 5, child: hist)]);
+        if (c.maxWidth < 900) return Column(children: [compose, const SizedBox(height: 16), comm, const SizedBox(height: 16), hist]);
+        return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(flex: 5, child: Column(children: [compose, const SizedBox(height: 16), comm])), const SizedBox(width: 16), Expanded(flex: 5, child: hist)]);
       }),
     ]);
   }

@@ -36,6 +36,7 @@ Color statusColor(String s) {
 }
 
 ImageProvider? dataImage(String s) {
+  if (s.startsWith('http://') || s.startsWith('https://')) return NetworkImage(s); // gambar dari backend
   if (!s.startsWith('data:')) return null;
   try {
     return MemoryImage(base64Decode(s.substring(s.indexOf(',') + 1)));

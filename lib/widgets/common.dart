@@ -74,6 +74,12 @@ class EventImage extends StatelessWidget {
         height: height,
         child: memo != null
             ? Image.memory(memo, fit: BoxFit.cover)
+            : (imgPath.startsWith('http://') || imgPath.startsWith('https://'))
+            ? Image.network(
+          imgPath,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Image.asset(fallbackAsset, fit: BoxFit.cover),
+        )
             : Image.asset(
           imgPath.isNotEmpty ? imgPath : fallbackAsset,
           fit: BoxFit.cover,

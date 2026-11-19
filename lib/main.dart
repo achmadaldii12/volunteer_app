@@ -7,6 +7,7 @@ import 'providers/activity_store.dart';
 import 'providers/app_state.dart';
 import 'providers/profile_store.dart';
 import 'screens/auth_screens.dart';
+import 'services/sync_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,9 +16,11 @@ Future<void> main() async {
   await profile.load(); // pengaturan tampilan & data tambahan profil
   final activity = ActivityStore();
   await activity.load(); // data Aktivitas Saya (evaluasi, catatan, pengajuan, dll.)
+  final app = AppState();
+  await ApiSync.instance.bind(app, profile, activity); // sinkronisasi backend (aktif setelah login server)
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => AppState()),
+      ChangeNotifierProvider<AppState>.value(value: app),
       ChangeNotifierProvider<ProfileStore>.value(value: profile),
       ChangeNotifierProvider<ActivityStore>.value(value: activity),
       ChangeNotifierProvider<OrgStore>.value(value: OrgStore.instance), // penyelenggara

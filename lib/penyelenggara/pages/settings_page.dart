@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme.dart';
 import '../../providers/app_state.dart';
+import '../../services/sync_service.dart';
 import '../org_widgets.dart';
 import '../organizer_store.dart';
 
@@ -19,6 +20,16 @@ class _SettingsPageState extends State<SettingsPage> {
     _old.dispose();
     _new.dispose();
     super.dispose();
+  }
+
+  bool _uploading = false;
+
+  Future<void> _uploadEvents() async {
+    setState(() => _uploading = true);
+    final msg = await ApiSync.instance.uploadLocalEvents();
+    if (!mounted) return;
+    setState(() => _uploading = false);
+    toast(context, msg);
   }
 
   @override
@@ -73,6 +84,21 @@ class _SettingsPageState extends State<SettingsPage> {
             title: const Text('Tampilkan lencana pendaftar baru'),
             value: org.notifNewReg,
             onChanged: (v) => org.setFlags(newReg: v),
+          ),
+        ]),
+      ),
+      const SizedBox(height: 16),
+      OrgSection(
+        title: 'Database Server',
+        icon: Icons.cloud_upload_rounded,
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Kirim semua event bawaan aplikasi beserta fotonya ke database. Aman ditekan berulang; hanya yang belum ada di server yang dikirim.', style: TextStyle(fontSize: 12, color: Colors.black54)),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            style: redBtn(),
+            onPressed: _uploading ? null : _uploadEvents,
+            icon: const Icon(Icons.cloud_upload_rounded, size: 18),
+            label: Text(_uploading ? 'Mengirim...' : 'Unggah Semua Event ke Database'),
           ),
         ]),
       ),

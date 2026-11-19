@@ -345,6 +345,12 @@ class ActivityStore extends ChangeNotifier {
 
   String _newId(String p) => '${p}_${DateTime.now().microsecondsSinceEpoch}';
 
+  /// Dipakai sinkronisasi backend: muat ulang data akun dari penyimpanan.
+  void reloadUser(String id) {
+    _users.remove(id);
+    notifyListeners();
+  }
+
   /// Menghapus seluruh data aktivitas akun (dipakai saat akun dihapus).
   void clearUser(String id) {
     _users.remove(id);

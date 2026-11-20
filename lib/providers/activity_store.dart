@@ -150,6 +150,13 @@ class Complaint {
       );
 }
 
+/// BARU: pasangan (id relawan, laporan) agar penyelenggara tahu siapa pelapornya.
+class ComplaintEntry {
+  final String userId;
+  final Complaint complaint;
+  const ComplaintEntry(this.userId, this.complaint);
+}
+
 class Appreciation {
   final String id, fromId, fromName, toId, toName, type, message;
   final DateTime createdAt;
@@ -563,6 +570,36 @@ class ActivityStore extends ChangeNotifier {
     }
     _u(uid)['complaints'] = l;
     _save(uid);
+  }
+
+  // ------------------------------------------------ BARU: sisi penyelenggara
+  /// Semua laporan kendala milik relawan di [userIds], terbaru di atas.
+  List<ComplaintEntry> complaintsOf(Iterable<String> userIds) {
+    final out = <ComplaintEntry>[];
+    for (final id in userIds) {
+      for (final c in complaints(id)) {
+        out.add(ComplaintEntry(id, c));
+      }
+    }
+    out.sort((x, y) => y.complaint.createdAt.compareTo(x.complaint.createdAt));
+    return out;
+  }
+
+  /// Penyelenggara mengubah status laporan: sent | processing | done.
+  /// Mengembalikan false jika laporan tidak ditemukan.
+  bool setComplaintStatus(String uid, String id, String status) {
+    final l = _list(uid, 'complaints');
+    var found = false;
+    for (final m in l) {
+      if (m['id'] == id) {
+        m['status'] = status;
+        found = true;
+      }
+    }
+    if (!found) return false;
+    _u(uid)['complaints'] = l;
+    _save(uid);
+    return true;
   }
 
   // ------------------------------------------------ apresiasi relawan

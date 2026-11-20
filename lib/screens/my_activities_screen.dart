@@ -245,13 +245,11 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
               final wide = c.maxWidth >= 860;
               final list = _tab == 0 ? registered : done;
 
+              // Layar penuh seperti halaman Komunitas (tanpa batas lebar 1100)
               return ListView(
-                padding: EdgeInsets.fromLTRB(wide ? 24 : 14, 6, wide ? 24 : 14, 24),
+                padding: EdgeInsets.fromLTRB(wide ? 20 : 14, 8, wide ? 20 : 14, 24),
                 children: [
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1100),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         _banner(s, wide),
                         const SizedBox(height: 14),
                         _tabs(registered.length, done.length),
@@ -298,9 +296,7 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
                         ),
                         const SizedBox(height: 10),
                         _features(context, s, st, c.maxWidth),
-                      ]),
-                    ),
-                  ),
+                  ]),
                 ],
               );
             }),
@@ -750,70 +746,94 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
           badge: st.received(u.id).length),
     ];
 
-    final inner = maxWidth - 48;
-    final cols = inner >= 1000 ? 4 : (inner >= 640 ? 3 : 2);
-    const gap = 10.0;
-    final double avail = maxWidth >= 860 ? (inner > 1100 ? 1100.0 : inner) : inner;
-    final double w = (avail - 32 - gap * (cols - 1)) / cols;
-
     return PCard(
       color: isDark(context) ? null : kActPink.withAlpha(150),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: const [
-          Icon(Icons.auto_awesome, color: kActRed, size: 20),
-          SizedBox(width: 8),
-          Text('Fitur Tambahan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+        Row(children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: kActRed.withAlpha(28), borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.auto_awesome, color: kActRed, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Pusat Kontribusi Saya',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+              Text('Kelola kegiatan, poin, dan pengalamanmu dalam satu tempat',
+                  style: TextStyle(fontSize: 11.5, color: muted(context))),
+            ]),
+          ),
         ]),
-        const SizedBox(height: 12),
-        Wrap(spacing: gap, runSpacing: gap, children: [
-          for (final f in items)
-            SizedBox(
-              width: w > 120 ? w : 140,
-              child: Material(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => _open(f.page()),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(children: [
-                      Icon(f.icon, color: kActRed, size: 26),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(f.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, height: 1.2)),
-                          const SizedBox(height: 2),
-                          Text(f.subtitle,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 10, color: muted(context), height: 1.25)),
-                        ]),
-                      ),
-                      const SizedBox(width: 6),
-                      f.badge > 0
-                          ? Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(color: kActRed, shape: BoxShape.circle),
-                              child: Text('${f.badge}',
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(color: kActPink, shape: BoxShape.circle),
-                              child: const Icon(Icons.chevron_right, size: 16, color: kActRed),
-                            ),
-                    ]),
-                  ),
-                ),
-              ),
-            ),
-        ]),
+        const SizedBox(height: 14),
+        // Grid mengikuti lebar kartu: 4 kolom (laptop lebar), 3, 2, atau 1 kolom (HP)
+        LayoutBuilder(builder: (context, box) {
+          final inner = box.maxWidth;
+          final cols = inner >= 1100 ? 4 : (inner >= 700 ? 3 : (inner >= 440 ? 2 : 1));
+          const gap = 10.0;
+          final double w = ((inner - gap * (cols - 1)) / cols).floorToDouble();
+          return Wrap(spacing: gap, runSpacing: gap, children: [
+            for (final f in items) SizedBox(width: w, child: _featureTile(context, f)),
+          ]);
+        }),
       ]),
+    );
+  }
+
+  // ------------------------------------------------------- kotak menu
+  Widget _featureTile(BuildContext context, _Feature f) {
+    final dark = isDark(context);
+    return Material(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _open(f.page()),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 76),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: dark ? kActRed.withAlpha(36) : kActPink,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(f.icon, color: kActRed, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(f.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, height: 1.2)),
+                  const SizedBox(height: 2),
+                  Text(f.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11, color: muted(context), height: 1.25)),
+                ]),
+              ),
+              const SizedBox(width: 8),
+              f.badge > 0
+                  ? Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(color: kActRed, shape: BoxShape.circle),
+                      child: Text('${f.badge}',
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(color: dark ? kActRed.withAlpha(36) : kActPink, shape: BoxShape.circle),
+                      child: const Icon(Icons.chevron_right, size: 16, color: kActRed),
+                    ),
+            ]),
+          ),
+        ),
+      ),
     );
   }
 }

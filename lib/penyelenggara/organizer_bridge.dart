@@ -57,4 +57,20 @@ extension OrganizerBridge on AppState {
     _commit();
     return null;
   }
+
+  /// BARU: penyelenggara membalas pesan relawan. Balasan muncul di Notifikasi relawan.
+  String? orgReplyToVolunteer(String userId, String title, String body) {
+    if (userById(userId) == null) return 'Relawan tidak ditemukan';
+    notifs.insert(
+        0,
+        Notif(
+            id: newId('n'),
+            userId: userId,
+            title: title,
+            body: body,
+            kind: 'info',
+            createdAt: DateTime.now()));
+    _commit();
+    return null;
+  }
 }

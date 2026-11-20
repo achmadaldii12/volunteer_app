@@ -10,6 +10,7 @@ import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'registration_success_screen.dart';
 import 'biodata_form_screen.dart'; // <-- BARU
+import 'organizer_profile_screen.dart'; // <-- BARU: profil & kontak penyelenggara
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel e;
@@ -728,11 +729,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
               side: BorderSide(color: _red.withOpacity(0.35)),
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Menghubungkan ke penyelenggara event...')),
-              );
-            },
+            onPressed: () => showOrganizerContactSheet(context, widget.e.organizer, event: widget.e),
             icon: const Icon(Icons.support_agent, color: _red, size: 20),
             label: const Text('Kontak Organisasi',
                 style: TextStyle(color: _red, fontWeight: FontWeight.bold, fontSize: 14)),
@@ -849,8 +846,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> with SingleTicker
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
               ),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Halaman profil organisasi belum tersedia')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => OrganizerProfileScreen(widget.e.organizer, fromEvent: widget.e),
+                  ),
                 );
               },
               child: const Row(

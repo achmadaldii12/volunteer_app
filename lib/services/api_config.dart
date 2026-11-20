@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Urutan prioritas:
 ///  1. Alamat yang diisi lewat dialog "Pengaturan Server" (tekan LAMA logo di layar Login).
 ///  2. --dart-define=API_BASE=http://...   (saat flutter run / build)
-///  3. Bawaan: emulator Android -> 10.0.2.2 , Flutter Web/Chrome -> localhost
+///  3. Bawaan: emulator Android -> 10.0.2.2:8000 , Flutter Web/Chrome -> localhost:8000 (php artisan serve)
 class ApiConfig {
   static const String _defined = String.fromEnvironment('API_BASE', defaultValue: '');
   static const String _prefKey = 'api_base_url';
@@ -19,8 +19,8 @@ class ApiConfig {
   }
 
   static String get defaultUrl => kIsWeb
-      ? 'http://localhost/volunteer_backend/api.php'
-      : 'http://10.0.2.2/volunteer_backend/api.php';
+      ? 'http://localhost:8000/api'
+      : 'http://10.0.2.2:8000/api';
 
   static String get baseUrl => _custom ?? (_defined.isNotEmpty ? _defined : defaultUrl);
 
@@ -30,11 +30,11 @@ class ApiConfig {
     if (s.isEmpty) return '';
     if (!s.startsWith('http://') && !s.startsWith('https://')) s = 'http://$s';
     s = s.replaceAll(RegExp(r'/+$'), '');
-    if (!s.contains('api.php')) {
-      final uri = Uri.parse(s);
-      s = (uri.path.isEmpty || uri.path == '/') ? '$s/volunteer_backend/api.php' : '$s/api.php';
-    }
-    return s;
+    final uri = Uri.parse(s);
+    final port = uri.hasPort ? uri.port : 8000;
+    var path = uri.path;
+    if (!path.endsWith('/api')) path = (path.isEmpty || path == '/') ? '/api' : '$path/api';
+    return '${uri.scheme}://${uri.host}:$port$path';
   }
 
   /// Simpan alamat kustom. Kosong = kembali ke bawaan.

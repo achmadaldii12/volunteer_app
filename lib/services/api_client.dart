@@ -22,10 +22,9 @@ class ApiClient {
     Duration timeout = const Duration(seconds: 25),
   }) async {
     try {
-      final base = Uri.parse(ApiConfig.baseUrl);
-      final q = Map<String, String>.from(base.queryParameters);
-      q['r'] = route;
-      final uri = base.replace(queryParameters: q);
+      // Laravel: alamat dasar sudah berakhiran /api, contoh http://localhost:8000/api + /auth/login
+      final root = ApiConfig.baseUrl.replaceAll(RegExp(r'/+$'), '');
+      final uri = Uri.parse('$root/$route');
       final headers = <String, String>{
         'Content-Type': 'application/json; charset=utf-8',
         'Accept': 'application/json',
@@ -46,7 +45,7 @@ class ApiClient {
         final d = jsonDecode(utf8.decode(res.bodyBytes));
         if (d is Map) j = Map<String, dynamic>.from(d);
       } catch (_) {
-        return ApiResponse(false, res.statusCode, j, 'Respons server tidak valid (cek PHP / config.php)', false);
+        return ApiResponse(false, res.statusCode, j, 'Respons server tidak valid (cek terminal php artisan serve)', false);
       }
       final ok = res.statusCode >= 200 && res.statusCode < 300 && j['ok'] != false;
       final err = ok ? null : (j['error'] ?? 'Permintaan gagal (${res.statusCode})').toString();

@@ -11,6 +11,7 @@ import 'certificate_screen.dart';
 import 'impact_screen.dart';
 import 'profile_extra_pages.dart';
 import 'profile_pages.dart';
+import '../widgets/app_logo_button.dart'; // BARU: logo -> Beranda
 
 /// Halaman Profil Saya (tab Profil pada navigasi bawah).
 class ProfileScreen extends StatefulWidget {
@@ -59,6 +60,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             foregroundColor: Colors.white, // Ikon dan teks default putih
             elevation: 2,
             automaticallyImplyLeading: false, // Menghilangkan tombol kembali otomatis
+            leadingWidth: 64,
+            leading: const Padding(
+              padding: EdgeInsets.only(left: 16),
+              child: Center(child: AppLogoButton(size: 40, onDark: true)), // BARU: logo -> Beranda
+            ),
             title: Text(
               tx(context, 'Profil Saya', 'My Profile'),
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

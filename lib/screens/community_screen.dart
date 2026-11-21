@@ -8,6 +8,7 @@ import '../providers/community_logic.dart';
 import 'community_more_screens.dart';
 import 'community_room_screen.dart';
 import 'community_widgets.dart';
+import '../widgets/app_logo_button.dart'; // BARU: logo -> Beranda
 
 // ============================================================
 // BERANDA KOMUNITAS RELAWAN
@@ -262,6 +263,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leadingWidth: 64,
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: Center(child: AppLogoButton(size: 40)),
+        ),
         title: const Text('Komunitas Relawan'),
         actions: [
           IconButton(

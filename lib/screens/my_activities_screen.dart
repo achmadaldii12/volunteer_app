@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../providers/activity_store.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
+import '../widgets/app_logo_button.dart'; // BARU: logo -> Beranda
 import 'activity_extra_pages.dart';
 import 'activity_pages.dart';
 import 'event_detail_screen.dart';
@@ -230,6 +231,11 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
     return Scaffold(
       backgroundColor: dark ? null : const Color(0xFFFFF7F7),
       appBar: AppBar(
+        leadingWidth: 64,
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: Center(child: AppLogoButton(size: 40)),
+        ),
         title: const Text('Aktivitas Saya'),
         actions: [
           IconButton(

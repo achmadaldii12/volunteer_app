@@ -6,6 +6,7 @@ import '../core/utils.dart';
 import '../models/models.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
+import '../widgets/app_logo_button.dart'; // BARU: logo -> Beranda
 import 'event_detail_screen.dart';
 import '../widgets/motion.dart'; // BARU: animasi kartu
 
@@ -167,7 +168,11 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              const Text('Cari Event', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              Row(children: [
+                const AppLogoButton(size: 44), // BARU: logo -> kembali ke Beranda
+                const SizedBox(width: 12),
+                const Text('Cari Event', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              ]),
               const SizedBox(height: 14),
               TextField(
                 controller: _ctrl,

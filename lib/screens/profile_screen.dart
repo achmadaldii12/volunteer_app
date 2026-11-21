@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../core/theme.dart';
 import '../core/utils.dart';
+import '../core/warm_theme.dart'; // BARU: tema Kuning
 import '../models/gamification.dart';
 import '../providers/app_state.dart';
 import '../providers/profile_store.dart';
@@ -622,34 +623,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // ------------------------------------------------------ pengaturan akun
   Widget _themeSelector(BuildContext context, AppState s) {
-    Widget item(ThemeMode m, IconData icon) {
-      final selected = s.themeMode == m;
-      return InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => s.setThemeMode(m),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary : Colors.transparent,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, size: 18, color: selected ? Colors.white : muted(context)),
-        ),
-      );
-    }
+    // BARU: ditambah pilihan tema Kuning (ikon palet) di antara Light dan Dark
+    return ValueListenableBuilder<bool>(
+      valueListenable: WarmTheme.enabled,
+      builder: (context, warm, _) {
+        final warmOn = warm && s.themeMode == ThemeMode.light;
 
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withAlpha(18),
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        item(ThemeMode.light, Icons.light_mode),
-        item(ThemeMode.dark, Icons.dark_mode),
-        item(ThemeMode.system, Icons.desktop_windows_outlined),
-      ]),
+        Widget pill(bool selected, IconData icon, String tip, VoidCallback onTap) {
+          return Tooltip(
+            message: tip,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: onTap,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.primary : Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 18, color: selected ? Colors.white : muted(context)),
+              ),
+            ),
+          );
+        }
+
+        Widget item(ThemeMode m, IconData icon, String tip) => pill(
+              s.themeMode == m && !warmOn,
+              icon,
+              tip,
+              () {
+                WarmTheme.set(false);
+                s.setThemeMode(m);
+              },
+            );
+
+        return Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withAlpha(18),
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            item(ThemeMode.light, Icons.light_mode, tx(context, 'Terang', 'Light')),
+            pill(warmOn, Icons.palette_outlined, tx(context, 'Kuning', 'Warm'), () {
+              WarmTheme.set(true);
+              s.setThemeMode(ThemeMode.light);
+            }),
+            item(ThemeMode.dark, Icons.dark_mode, tx(context, 'Gelap', 'Dark')),
+            item(ThemeMode.system, Icons.desktop_windows_outlined, tx(context, 'Sistem', 'System')),
+          ]),
+        );
+      },
     );
   }
 
@@ -699,7 +724,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: Icons.dark_mode_outlined,
           color: const Color(0xFF4F46E5),
           title: tx(context, 'Tampilan Aplikasi', 'App Appearance'),
-          subtitle: 'Light • Dark • ${tx(context, 'Sistem', 'System')}',
+          subtitle: 'Light • ${tx(context, 'Kuning', 'Warm')} • Dark • ${tx(context, 'Sistem', 'System')}',
           trailing: _themeSelector(context, s),
           onTap: () {
             final next = s.themeMode == ThemeMode.light

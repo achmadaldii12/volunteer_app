@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'core/theme.dart';
+import 'core/warm_theme.dart'; // BARU: tema Kuning
 import 'penyelenggara/organizer_store.dart';
 import 'providers/activity_store.dart';
 import 'providers/app_state.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
   await initializeDateFormatting('id_ID');
   final profile = ProfileStore();
   await profile.load(); // pengaturan tampilan & data tambahan profil
+  await WarmTheme.load(); // BARU: muat pilihan tema Kuning
   final activity = ActivityStore();
   await activity.load(); // data Aktivitas Saya (evaluasi, catatan, pengajuan, dll.)
   final app = AppState();
@@ -69,7 +71,18 @@ class VolunteerApp extends StatelessWidget {
             textScaler: TextScaler.linear((wide ? 1.1 : 1.0) * p.textScale),
             disableAnimations: p.reduceMotion || mq.disableAnimations,
           ),
-          child: child ?? const SizedBox.shrink(),
+          // BARU: tema Kuning = filter hangat di atas tema Terang
+          // (tidak berlaku untuk tema Gelap dan dashboard penyelenggara)
+          child: ValueListenableBuilder<bool>(
+            valueListenable: WarmTheme.enabled,
+            builder: (context, warm, _) {
+              final content = child ?? const SizedBox.shrink();
+              final apply = warm &&
+                  s.user?.role != 'organizer' &&
+                  Theme.of(context).brightness == Brightness.light;
+              return apply ? WarmTheme.wrap(content) : content;
+            },
+          ),
         );
       },
       home: const SplashScreen(),

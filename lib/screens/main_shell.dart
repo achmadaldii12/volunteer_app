@@ -14,6 +14,7 @@ import 'search_screen.dart';
 import 'my_activities_screen.dart';
 import 'community_screen.dart';
 import '../core/nav_bus.dart'; // <-- BARU
+import '../widgets/motion.dart'; // BARU: animasi pindah tab
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -24,6 +25,8 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+  int _shownIndex = 0; // BARU: untuk menentukan arah animasi pindah tab
+  double _tabDir = 1;
 
   // <-- BARU: mulai
   @override
@@ -57,6 +60,12 @@ class _MainShellState extends State<MainShell> {
     final isDarkMode = isDark(context);
     final navBackgroundColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
 
+    // BARU: arah animasi (maju = masuk dari kanan, mundur = dari kiri)
+    if (_shownIndex != _currentIndex) {
+      _tabDir = _currentIndex > _shownIndex ? 1 : -1;
+      _shownIndex = _currentIndex;
+    }
+
     final List<Widget> screens = [
       const HomeScreen(),
       const SearchScreen(),
@@ -70,7 +79,10 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: screens,
+        children: [
+          for (var i = 0; i < screens.length; i++)
+            TabTransition(active: _currentIndex == i, direction: _tabDir, child: screens[i]),
+        ],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -115,10 +127,15 @@ class _MainShellState extends State<MainShell> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? primaryColor : Colors.grey.shade400,
-              size: 22,
+            AnimatedScale(
+              scale: isSelected ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutBack,
+              child: Icon(
+                icon,
+                color: isSelected ? primaryColor : Colors.grey.shade400,
+                size: 22,
+              ),
             ),
             const SizedBox(height: 2),
             Text(

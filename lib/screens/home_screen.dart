@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'event_detail_screen.dart';
+import '../widgets/motion.dart'; // BARU: animasi kartu
 import 'impact_screen.dart';
 
 // Model Sederhana untuk Artikel Blog Volunteer
@@ -823,7 +824,10 @@ class _LatestEventCardState extends State<_LatestEventCard> {
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      child: MouseRegion(
+      child: HoverLift(
+        scale: 1.012,
+        lift: 4,
+        child: MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
         child: AnimatedContainer(
@@ -895,7 +899,7 @@ class _LatestEventCardState extends State<_LatestEventCard> {
             ),
           ),
         ),
-      ),
+      )),
     );
   }
 }
@@ -909,7 +913,10 @@ class _PopularCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
     final c = categoryInfo(e.category);
-    return AppCard(
+    return HoverLift(
+      scale: 1.04,
+      lift: 6,
+      child: AppCard(
       padding: const EdgeInsets.all(10),
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(e))),
       child: Column(
@@ -926,6 +933,6 @@ class _PopularCard extends StatelessWidget {
           InfoRow(Icons.group_outlined, '${s.participants(e)} peserta', size: 11),
         ],
       ),
-    );
+    ));
   }
 }

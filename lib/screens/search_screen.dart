@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../providers/app_state.dart';
 import '../widgets/common.dart';
 import 'event_detail_screen.dart';
+import '../widgets/motion.dart'; // BARU: animasi kartu
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -281,7 +282,10 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
     final Color normalColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
     final Color hoverColor = isDarkMode ? const Color(0xFF321A1A) : const Color(0xFFFFEBEE);
 
-    return MouseRegion(
+    return HoverLift(
+      scale: 1.04,
+      lift: 6,
+      child: MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
@@ -427,6 +431,6 @@ class _SearchEventGridCardState extends State<_SearchEventGridCard> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

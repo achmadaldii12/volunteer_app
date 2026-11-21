@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder; // BARU: untuk iOS/macOS
 import 'package:google_fonts/google_fonts.dart';
+import '../widgets/motion.dart'; // BARU: animasi buka halaman
 
 class AppColors {
   // Palet Warna Merah Kemanusiaan
@@ -62,6 +64,15 @@ ThemeData buildTheme(Brightness b) {
       ),
     ),
     snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+    // BARU: animasi halus saat membuka halaman (mis. detail event)
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: SmoothPageTransitionsBuilder(),
+      TargetPlatform.windows: SmoothPageTransitionsBuilder(),
+      TargetPlatform.linux: SmoothPageTransitionsBuilder(),
+      TargetPlatform.fuchsia: SmoothPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+    }),
   );
 }
 

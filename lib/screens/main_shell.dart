@@ -998,72 +998,136 @@ class _CustomStatTile extends StatelessWidget {
   }
 }
 
-class _LatestEventCard extends StatelessWidget {
+class _LatestEventCard extends StatefulWidget {
   const _LatestEventCard(this.e);
   final EventModel e;
 
   @override
+  State<_LatestEventCard> createState() => _LatestEventCardState();
+}
+
+class _LatestEventCardState extends State<_LatestEventCard> {
+  bool _hover = false; // BARU: true saat kursor berada di atas kartu
+
+  @override
   Widget build(BuildContext context) {
+    final e = widget.e;
     final catInfo = categoryInfo(e.category);
-    
+    final dark = isDark(context);
+    final showArrow = MediaQuery.of(context).size.width >= 700; // panah hanya di layar lebar
+    const dur = Duration(milliseconds: 260);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: isDark(context) ? const Color(0xFF1E1E1E) : const Color(0xFFFAFAFA),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 4))],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(e))),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: SizedBox(
-                    width: 140,
-                    height: 120,
-                    child: EventImage(e, width: 140, height: 120, radius: 14),
-                  ),
+      child: HoverLift(
+        scale: 1.012,
+        lift: 4,
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          child: AnimatedContainer(
+            duration: dur,
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              // merah muda lembut saat kursor di atas kartu
+              color: _hover
+                  ? (dark ? const Color(0xFF3A2424) : const Color(0xFFFFE6E6))
+                  : (dark ? const Color(0xFF1E1E1E) : const Color(0xFFFAFAFA)),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _hover ? const Color(0xFFF2A9A9) : Colors.grey.withOpacity(0.15)),
+              boxShadow: [
+                BoxShadow(
+                  color: _hover ? const Color(0xFFE53935).withOpacity(0.20) : Colors.black.withOpacity(0.05),
+                  blurRadius: _hover ? 18 : 4,
+                  offset: Offset(0, _hover ? 8 : 4),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                hoverColor: Colors.transparent, // hilangkan warna abu-abu bawaan
+                highlightColor: const Color(0xFFE53935).withOpacity(0.05),
+                splashColor: const Color(0xFFE53935).withOpacity(0.08),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(e))),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        e.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(fmtDate(e.date), style: TextStyle(fontSize: 12, color: muted(context))),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: softOf(context), borderRadius: BorderRadius.circular(10)),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(catInfo.icon, size: 11, color: catInfo.color),
-                            const SizedBox(width: 4),
-                            Text(e.category, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: catInfo.color)),
-                          ],
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: SizedBox(
+                          width: 140,
+                          height: 120,
+                          // gambar membesar halus saat hover
+                          child: AnimatedScale(
+                            scale: _hover ? 1.1 : 1.0,
+                            duration: const Duration(milliseconds: 420),
+                            curve: Curves.easeOut,
+                            child: EventImage(e, width: 140, height: 120, radius: 14),
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        // teks bergeser sedikit ke kanan saat hover
+                        child: AnimatedPadding(
+                          duration: dur,
+                          curve: Curves.easeOut,
+                          padding: EdgeInsets.only(left: _hover ? 8 : 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                e.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(fmtDate(e.date), style: TextStyle(fontSize: 12, color: muted(context))),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(color: softOf(context), borderRadius: BorderRadius.circular(10)),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(catInfo.icon, size: 11, color: catInfo.color),
+                                    const SizedBox(width: 4),
+                                    Text(e.category, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: catInfo.color)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // panah merah meluncur masuk dari kiri saat hover
+                      if (showArrow)
+                        AnimatedSlide(
+                          duration: dur,
+                          curve: Curves.easeOut,
+                          offset: _hover ? Offset.zero : const Offset(-0.6, 0),
+                          child: AnimatedOpacity(
+                            duration: dur,
+                            opacity: _hover ? 1.0 : 0.0,
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: const BoxDecoration(color: Color(0xFFE53935), shape: BoxShape.circle),
+                              child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -1072,31 +1136,81 @@ class _LatestEventCard extends StatelessWidget {
   }
 }
 
-class _PopularCard extends StatelessWidget {
+class _PopularCard extends StatefulWidget {
   const _PopularCard(this.e, {required this.cardWidth});
   final EventModel e;
   final double cardWidth;
 
   @override
+  State<_PopularCard> createState() => _PopularCardState();
+}
+
+class _PopularCardState extends State<_PopularCard> {
+  bool _hover = false; // BARU: true saat kursor berada di atas kartu
+
+  @override
   Widget build(BuildContext context) {
     // Membaca state aplikasi
     final s = context.watch<AppState>();
-    return AppCard(
-      padding: const EdgeInsets.all(10),
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(e))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: EventImage(e, width: cardWidth, height: 180, radius: 12),
+    final e = widget.e;
+    final dark = isDark(context);
+    const dur = Duration(milliseconds: 260);
+
+    return HoverLift(
+      scale: 1.04,
+      lift: 6,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: AnimatedContainer(
+          duration: dur,
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: _hover
+                ? (dark ? const Color(0xFF3A2424) : const Color(0xFFFFE6E6))
+                : (dark ? const Color(0xFF1F1B30) : Theme.of(context).colorScheme.surface),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _hover ? const Color(0xFFF2A9A9) : Colors.transparent),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(dark ? 0 : (_hover ? 0.22 : 0.08)),
+                blurRadius: _hover ? 18 : 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          Text(e.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-          const SizedBox(height: 4),
-          InfoRow(Icons.calendar_today_outlined, fmtDate(e.date), size: 11),
-          InfoRow(Icons.group_outlined, '${s.participants(e)} peserta', size: 11),
-        ],
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              hoverColor: Colors.transparent,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(e))),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: AnimatedScale(
+                        scale: _hover ? 1.08 : 1.0,
+                        duration: const Duration(milliseconds: 420),
+                        curve: Curves.easeOut,
+                        child: EventImage(e, width: widget.cardWidth, height: 180, radius: 12),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(e.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 4),
+                    InfoRow(Icons.calendar_today_outlined, fmtDate(e.date), size: 11),
+                    InfoRow(Icons.group_outlined, '${s.participants(e)} peserta', size: 11),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

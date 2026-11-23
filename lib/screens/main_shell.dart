@@ -15,6 +15,7 @@ import 'my_activities_screen.dart';
 import 'community_screen.dart';
 import '../core/nav_bus.dart'; // <-- BARU
 import '../widgets/motion.dart'; // BARU: animasi pindah tab
+import '../widgets/glass_nav_bar.dart'; // BARU: menu bawah gaya kaca
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -22,6 +23,9 @@ class MainShell extends StatefulWidget {
   @override
   State<MainShell> createState() => _MainShellState();
 }
+
+/// true = menu bawah gaya kaca melayang (baru). false = menu bawah lama.
+const bool kUseGlassNav = true;
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
@@ -84,7 +88,19 @@ class _MainShellState extends State<MainShell> {
             TabTransition(active: _currentIndex == i, direction: _tabDir, child: screens[i]),
         ],
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: kUseGlassNav
+          ? GlassNavBar(
+              currentIndex: _currentIndex,
+              onTap: changeTab,
+              items: const [
+                GlassNavItem(Icons.home_rounded, 'Beranda'),
+                GlassNavItem(Icons.event_rounded, 'Event'),
+                GlassNavItem(Icons.history_rounded, 'Riwayat'),
+                GlassNavItem(Icons.people_rounded, 'Komunitas'),
+                GlassNavItem(Icons.person_rounded, 'Profil'),
+              ],
+            )
+          : Container(
         decoration: BoxDecoration(
           color: navBackgroundColor,
           boxShadow: [
